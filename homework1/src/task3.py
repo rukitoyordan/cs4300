@@ -1,7 +1,7 @@
 from sympy import isprime
 
 def check_number_status(number):
-     """Checks if a given number is either positive, negative or zero. It returns a statement declaring what type the number is."""
+    """Checks if a given number is either positive, negative or zero. It returns a statement declaring what type the number is."""
     if(number) > 0:
         return "this number is positive."
     elif(number) < 0:
@@ -11,7 +11,7 @@ def check_number_status(number):
 
 # https://www.geeksforgeeks.org/python/python-program-to-check-whether-a-number-is-prime-or-not/
 def first_ten_prime_numbers():
-     """Loops to print the first 10 prime numbers."""
+    """Loops to print the first 10 prime numbers."""
     prime_numbers = []
 
     for number in range(2,2000):

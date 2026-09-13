@@ -16,5 +16,5 @@ def string_invert(str):
 
 # Boolean
 def is_capitalized(str):
-     """Verifies if a string is completely capitalized or not. Returns True if fully capitalized, otherwise False."""
+    """Verifies if a string is completely capitalized or not. Returns True if fully capitalized, otherwise False."""
     return str.isupper()
