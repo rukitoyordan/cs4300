@@ -3,12 +3,15 @@ import requests
 
 def request_website_status(url):
     '''Verifies if a website link is online or offline. Returns a True statement if it is online, otherwise False.'''
-    response = requests.get(url)
+    try:
+        response = requests.get(url, timeout=15)
 
-    if response.status_code == 200:
-        # data = response.json()
-        # print(data)
-        return True
-    else:
+        if response.status_code == 200:
+            # data = response.json()
+            # print(data)
+            return True
+        return False
+        
+    except requests.RequestException:
         return False
     
