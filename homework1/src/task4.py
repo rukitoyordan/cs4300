@@ -3,8 +3,8 @@ def calculate_discount(price, discount):
     try:
         if price < 0 or discount < 0 or discount > 100:
             raise ValueError("Please provide valid pricing and discount percentage amounts.")
-    discounted_price = price*(discount/100)
-    return (price - discounted_price)
+        discounted_price = price*(discount/100)
+        return (price - discounted_price)
     except TypeError as numeric_error:
         raise TypeError("Please provide a numeric pricing and discount percentage, rather than a string.") from numeric_error
 
