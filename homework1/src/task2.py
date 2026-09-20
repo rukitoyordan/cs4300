@@ -9,12 +9,12 @@ def float_division(float1, float2):
     return float1/float2
 
 # String
-def string_invert(str):
+def string_invert(strng):
     """Inverts a provided string using a list slicing."""
-    string_reversed = str[::-1]
+    string_reversed = strng[::-1]
     return string_reversed
 
 # Boolean
-def is_capitalized(str):
+def is_capitalized(strng):
     """Verifies if a string is completely capitalized or not. Returns True if fully capitalized, otherwise False."""
-    return str.isupper()
+    return strng.isupper()
