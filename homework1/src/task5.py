@@ -4,7 +4,7 @@ def list_favorite_books():
     return favorite_books
 
 def obtain_first_three_books(favorite_books):
-    '''Apply list sclicing to print the first three books in the favorite books list.'''
+    '''Apply list slicing to print the first three books in the favorite books list.'''
     first_three_books = favorite_books[:3]
     print(first_three_books)
     return first_three_books

@@ -20,7 +20,7 @@ def test_obtain_first_three_books():
     assert len(first_three_books) == 3
     # Check if the slicing works properly.
     assert first_three_books == favorite_books[:3] 
-    # Ensures the fourht book is not within the three books.
+    # Ensures the fourth book is not within the three books.
     assert "Origin by Dan Brown" not in first_three_books
 
 def test_basic_student_database():
