@@ -11,11 +11,23 @@ source hw1_venv/bin/activate
 ## Required Packages
 ```bash
 python3 -m pip install pytest
-pip install sympy # Task 3
-pip install requests # Task7
+python3 -m pip install sympy # Task 3
+python3 -m pip install requests # Task7
 ```
 
 ## Running Pytests
 1. Open an Integrated Terminal within folder homework1.
 2. Ensure you have activated your virtual environment and that it has the proper packages installed.
-3. `python -m pytest`
+
+### Global Pytest
+To run all pytests at once: 
+`python -m pytest` (can add -q for 'quiet')
+
+### Individual Pytesting
+If you want to run an individual pytest: 
+`python -m pytest tests/test_task2.py`
+
+### Test Task 1 Console Output
+To verify that task1.py provides the script console output:
+`python src/task1.py`
+
