@@ -1,12 +1,12 @@
 # Integers
 def integer_mult(int1, int2):
     """Multiplies two integers and returns the resulting multiplication."""
-    return int1 * int2
+    return (int1 * int2)
 
 # Floating-Point Numbers
 def float_division(float1, float2):
     """Divides two floats and returns the resulting division."""
-    return float1/float2
+    return (float1 / float2)
 
 # String
 def string_invert(strng):
