@@ -2,7 +2,20 @@ import pytest
 # src to be able to run globally from homework1/
 from src import task3
 
-
+# Prime Checks
+@pytest.mark.parametrize("number, expected", [
+    (-7, False),
+    (0, False),
+    (1, False),
+    (2, True),
+    (4, False),
+    (9, False),
+    (25, False),
+    (97, True),
+])
+def test_is_prime(number, expected):
+    assert task3.is_prime(number) is expected
+    
 ## Control Structures
 # Tests: If Statement
 @pytest.mark.parametrize("number, expected", [
