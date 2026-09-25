@@ -1,4 +1,16 @@
-from sympy import isprime
+from math import isqrt
+
+# https://docs.python.org/3/library/math.html#math.isqrt
+def is_prime(number):
+    """Returns True when number is prime; otherwise returns False."""
+    if number < 2:
+        return False
+
+    for divisor in range(2, isqrt(number) + 1):
+        if number % divisor == 0:
+            return False
+
+    return True
 
 def check_number_status(number):
     """Checks if a given number is either positive, negative or zero. It returns a statement declaring what type the number is."""
@@ -17,7 +29,7 @@ def first_ten_prime_numbers():
     for number in range(2, 2000):
         if len(prime_numbers) == 10:
             break
-        if isprime(number):
+        if is_prime(number):
             prime_numbers.append(number)
             print(number)
     return prime_numbers

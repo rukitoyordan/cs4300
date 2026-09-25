@@ -16,7 +16,6 @@ python -m pip install -r requirements.txt
 
 ```bash
 python3 -m pip install pytest
-python3 -m pip install sympy # Task 3
 python3 -m pip install requests # Task7
 ```
 
