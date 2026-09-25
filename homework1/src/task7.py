@@ -7,8 +7,6 @@ def request_website_status(url):
         response = requests.get(url, timeout=15)
 
         if response.status_code == 200:
-            # data = response.json()
-            # print(data)
             return True
         return False
         
