@@ -22,10 +22,13 @@ python3 -m pip install requests # Task7
 
 ## Running Pytests
 1. Open an Integrated Terminal within folder homework1.
-2. Ensure you have activated your virtual environment and that it has the proper packages installed.
+2. Ensure you have activated your virtual environment and that it has the proper packages installed (requirements.txt installation).
 
 ### Global Pytest
-To run all pytests at once: 
+To run all pytests at once:
+- Within `/homework1` run: 
+`pytest`
+OR 
 `python -m pytest` (can add -q for 'quiet')
 
 ### Individual Pytesting
