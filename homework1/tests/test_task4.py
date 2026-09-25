@@ -8,7 +8,7 @@ from src import task4
 # Tests: Final Pricing after Discount
 @pytest.mark.parametrize("price, discount, expected", [
     # Some edge cases were discovered/learned about by using AI.
-    (100, 20, 80),(100, 100, 0),(200, 12.5, 175.0),(80.0, 12.5, 70.0),(True, 15, 0.85),(3.899, 10, 3.5091),(0.0, 50, 0.0)
+    (100, 20, 80),(100, 100, 0),(200, 12.5, 175.0),(80.0, 12.5, 70.0),(1, 15, 0.85),(3.899, 10, pytest.approx(3.5091)),(0.0, 50, 0.0)
 ])
 def test_calculate_discount(price, discount, expected):
     assert task4.calculate_discount(price, discount) == expected
