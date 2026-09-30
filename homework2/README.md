@@ -48,6 +48,11 @@ This homework is taking advantage of Django's `TestCase` for unit and integratio
    `python3 manage.py test bookings.tests.MovieModelTests -v 2`
    > Would run all the unit tests from the Movie Model for the Bookings App. The verbose helps with showing docstrings in the testing for better organization.
 
+### Available Unit Tests
+```bash
+python3 manage.py test bookings.tests.MovieModelTests -v 2 # Test Count: 6
+python3 manage.py test bookings.tests.SeatModelTests -v 2 # Test Count: 5
+
 ## AI Usage Log
 Codex GPT-5.6 Terra was utilized to analyze Django content, learn about how Django works a bit beyond the tutorial provided in the course assignment file. As I had trouble with running Django's porting, I moved to local VSCode usage.
 
