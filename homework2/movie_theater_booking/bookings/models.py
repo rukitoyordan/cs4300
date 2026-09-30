@@ -1,13 +1,17 @@
 # Models for booking app
 from django.db import models
 from django.conf import settings
+from django.core.validators import MinValueValidator
 
 # Movie Model: title, description, release date, duration.
 class Movie(models.Model):
     title = models.CharField(max_length=500)
     description = models.TextField()
     release_date = models.DateField()
-    duration = models.PositiveIntegerField(help_text="Duration (Mins)")
+    duration = models.PositiveIntegerField(
+    help_text="Duration (minutes)",
+    # add validation to ensure duration is non-negative (https://docs.djangoproject.com/en/6.1/ref/validators/)
+    validators=[MinValueValidator(0)],)
 
     def __str__(self):
         return self.title
