@@ -1,0 +1,6 @@
+hw2_venv/
+__pycache__/
+*.pyc
+github_key
+github_key.pub
+db.sqlite3
