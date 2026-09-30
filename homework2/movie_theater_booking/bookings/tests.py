@@ -73,3 +73,41 @@ class MovieModelTests(TestCase):
         with self.assertRaises(ValidationError):
             long_title_movie.full_clean()
 
+class SeatModelTests(TestCase):
+    """Test suite for the Seat model in the movie theater booking application."""
+    def setUp(self):
+        # Establish a baseline seat using the correct 'seat_number' field
+        self.seat = Seat.objects.create(
+            seat_number="A1"
+        )
+    
+    def test_seat_is_available_by_default_and_has_a_display_name(self):
+        """Check that new seats default to unbooked status and use their seat number for display."""
+        # Reference the seat created in setUp rather than creating a new one
+        self.assertFalse(self.seat.is_booked)
+        self.assertEqual(str(self.seat), "A1")
+        
+    def test_seat_number_must_be_unique(self):
+        """Verify that the database prevents duplicate seat numbers from being created."""
+        # "A1" was already created in setUp, so creating it again should trigger the error
+        with self.assertRaises(IntegrityError):
+            Seat.objects.create(seat_number="A1")
+        
+    def test_seat_can_be_explicitly_booked(self):
+        """Assert that a seat can be successfully created with a booked status."""
+        # Use a different seat number ("A2") to avoid hitting the unique constraint from setUp
+        booked_seat = Seat.objects.create(seat_number="A2", is_booked=True)
+        self.assertTrue(booked_seat.is_booked)
+        
+    def test_seat_number_exceeds_max_length(self):
+        """Validation rejects a seat number exceeding the 10 character limit."""
+        # Pass the 11-character string directly into the correct seat_number field
+        long_seat = Seat(seat_number="A" * 11)
+        with self.assertRaises(ValidationError):
+            long_seat.full_clean()
+            
+    def test_seat_missing_seat_number(self):
+        """Omitting the required seat_number field triggers a validation error."""
+        empty_seat = Seat(is_booked=False)
+        with self.assertRaises(ValidationError):
+            empty_seat.full_clean()
