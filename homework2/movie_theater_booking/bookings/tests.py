@@ -111,3 +111,47 @@ class SeatModelTests(TestCase):
         empty_seat = Seat(is_booked=False)
         with self.assertRaises(ValidationError):
             empty_seat.full_clean()
+
+class BookingModelTests(TestCase):
+    """Test suite for validating the relationships and constraints of the Booking model."""
+    def setUp(self):
+        """Create baseline data needed for foreign key relationships."""
+        self.user = get_user_model().objects.create_user(
+            username="booking_user", password="safe-test-password"
+        )
+        self.movie = Movie.objects.create(
+            title="Booking Test Movie",
+            description="A movie used to test bookings.",
+            release_date=date(2026, 2, 1),
+            duration=95,
+        )
+        self.seat = Seat.objects.create(seat_number="B2")
+        self.booking = Booking.objects.create(
+            movie=self.movie, seat=self.seat, user=self.user
+        )
+
+    def test_booking_connects_foreign_keys_and_auto_adds_timestamp(self):
+        """Check if booking successfully links all external models and generates a date."""
+        self.assertEqual(self.booking.movie, self.movie)
+        self.assertEqual(self.booking.seat, self.seat)
+        self.assertEqual(self.booking.user, self.user)
+        self.assertIsNotNone(self.booking.booking_date)
+        self.assertLessEqual(self.booking.booking_date, timezone.now())
+
+    def test_cascading_delete_removes_booking_if_seat_is_deleted(self):
+        """Deleting a referenced Seat automatically deletes the attached Booking."""
+        booking_id = self.booking.id
+        self.seat.delete()
+        self.assertFalse(Booking.objects.filter(pk=booking_id).exists())
+
+    def test_booking_missing_movie(self):
+        """Ensure that a booking cannot be created without a referenced movie."""
+        incomplete_booking = Booking(seat=self.seat, user=self.user)
+        with self.assertRaises(ValidationError):
+            incomplete_booking.full_clean()
+
+    def test_booking_missing_seat(self):
+        """Verify that a booking cannot be created without a referenced seat."""
+        incomplete_booking = Booking(movie=self.movie, user=self.user)
+        with self.assertRaises(ValidationError):
+            incomplete_booking.full_clean()
