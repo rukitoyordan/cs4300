@@ -40,6 +40,36 @@ class MovieModelTests(TestCase):
         )
         with self.assertRaises(ValidationError):
             invalid_movie.full_clean()
-          
+            
+    def test_movie_duration_can_be_zero(self):
+        """Analyze a movie duration of exactly 0 minutes and if it is valid."""
+        zero_duration_movie = Movie.objects.create(
+            title="Short Film",
+            description="A movie with no runtime.",
+            release_date=date(2026, 1, 1),
+            duration=0,
+        )
+        self.assertEqual(zero_duration_movie.duration, 0)
 
+    def test_movie_missing_required_fields(self):
+        """Ensure that omitting a required field like release_date triggers a validation error."""
+        incomplete_movie = Movie(
+            title="No Release Date",
+            description="Missing date.",
+            # release_date omitted
+            duration=120,
+        )
+        with self.assertRaises(ValidationError):
+            incomplete_movie.full_clean()     
+
+    def test_movie_title_exceeds_max_length(self):
+        """Reject a title exceeding the maximum character limit."""
+        long_title_movie = Movie(
+            title="A" * 501,  # Based on max_length of 500
+            description="This title is too long.",
+            release_date=date(2026, 1, 1),
+            duration=120,
+        )
+        with self.assertRaises(ValidationError):
+            long_title_movie.full_clean()
 
