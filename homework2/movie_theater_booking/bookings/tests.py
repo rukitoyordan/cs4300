@@ -30,26 +30,19 @@ class MovieModelTests(TestCase):
         self.assertEqual(str(self.movie), "Test Movie")
         self.assertEqual(self.movie.description, "A movie used by the model tests.")
         
-    def test_movie_duration_must_be_non_negative(self):
-        """Ensure that the Movie model validation catches and rejects negative duration values."""
-        invalid_movie = Movie(
-            title="Invalid Duration",
-            description="This should not validate.",
-            release_date=date(2026, 1, 1),
-            duration=-1,
-        )
-        with self.assertRaises(ValidationError):
-            invalid_movie.full_clean()
-            
-    def test_movie_duration_can_be_zero(self):
-        """Analyze a movie duration of exactly 0 minutes and if it is valid."""
-        zero_duration_movie = Movie.objects.create(
-            title="Short Film",
-            description="A movie with no runtime.",
-            release_date=date(2026, 1, 1),
-            duration=0,
-        )
-        self.assertEqual(zero_duration_movie.duration, 0)
+    def test_movie_duration_must_be_positive(self):
+        """Verify that movie validation rejects zero and negative durations."""
+        for duration in (0, -1):
+            with self.subTest(duration=duration):
+                invalid_movie = Movie(
+                    title="Invalid Duration",
+                    description="This should not validate.",
+                    release_date=date(2026, 1, 1),
+                    duration=duration,
+                )
+
+            with self.assertRaises(ValidationError):
+                invalid_movie.full_clean()
 
     def test_movie_missing_required_fields(self):
         """Ensure that omitting a required field like release_date triggers a validation error."""
