@@ -1,5 +1,5 @@
 hw1_venv/
 __pycache__/
 *.pyc
-github_key
-github_key.pub
+/github_key
+/github_key.pub
