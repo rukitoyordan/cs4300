@@ -54,6 +54,7 @@ This homework is taking advantage of Django's `TestCase` for unit and integratio
 ```bash
 python3 manage.py test bookings.tests.MovieModelTests -v 2 # Test Count: 6
 python3 manage.py test bookings.tests.SeatModelTests -v 2 # Test Count: 5
+python3 manage.py test bookings.tests.BookingModelTests -v 2 # Test Count: 5
 ```
 
 ## AI Usage Log
