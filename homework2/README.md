@@ -67,6 +67,7 @@ Codex GPT-5.6 Terra was utilized to analyze Django content, learn about how Djan
 Other usage:
 - Elaborate understanding on how certain Django functions work for the `bookings` application and file organization for that specific task.
 - Learn how to remove certain Django warning messages regarding BigAutoField.
+- Helped understand serializers as items that can translate big object database information into things like JSON files to better apply towards DRF. A topic I need to improve on a bit more.
 
 Gemini 3.1 Pro was utilized to better understand Django's native `TestCase` to create better unit and integration testing from the first commits. Rather than waiting till the end, the idea is taking more time to ensure good test-driven development is practiced in this homework to help with the course project later on.
 
