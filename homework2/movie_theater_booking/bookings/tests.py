@@ -148,3 +148,10 @@ class BookingModelTests(TestCase):
         incomplete_booking = Booking(movie=self.movie, user=self.user)
         with self.assertRaises(ValidationError):
             incomplete_booking.full_clean()
+    
+    def test_booking_missing_user(self):
+        """Checks that users are present when booking is made."""
+        incomplete_booking = Booking(movie=self.movie, seat=self.seat)
+
+        with self.assertRaises(ValidationError):
+            incomplete_booking.full_clean()
