@@ -8,6 +8,7 @@ from .models import Booking, Movie, Seat
 from django.db import IntegrityError, transaction
 from django.urls import reverse
 from rest_framework.test import APITestCase
+from .serializers import SeatSerializer
 
 class MovieModelTests(TestCase):
     """Test suite for validating the data integrity and core behaviors of the Movie model."""
@@ -306,3 +307,26 @@ class MovieAPITests(APITestCase):
 
         self.assertEqual(response.status_code, 201)
         self.assertTrue(Movie.objects.filter(title="Test Movie").exists())
+
+class SeatSerializerTests(TestCase):
+    """Test how seats are represented in API data."""
+
+    def test_serializes_seat_fields(self):
+        """Include the seat ID, number, and booking status."""
+        seat = Seat.objects.create(seat_number="C3")
+
+        data = SeatSerializer(seat).data
+
+        self.assertEqual(data["id"], seat.pk)
+        self.assertEqual(data["seat_number"], "C3")
+        self.assertFalse(data["is_booked"])
+
+    def test_booking_status_is_read_only(self):
+        """Ignore a client-supplied booking status when creating a seat."""
+        serializer = SeatSerializer(
+            data={"seat_number": "C4", "is_booked": True}
+        )
+
+        self.assertTrue(serializer.is_valid(), serializer.errors)
+        seat = serializer.save()
+        self.assertFalse(seat.is_booked)
