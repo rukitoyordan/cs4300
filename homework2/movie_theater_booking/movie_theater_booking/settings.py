@@ -127,3 +127,6 @@ MAILERS = {
         "BACKEND": "django.core.mail.backends.console.EmailBackend",
     },
 }
+
+# Fix Warning Messages regarding: makes the automatic primary-key choice explicit.
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
