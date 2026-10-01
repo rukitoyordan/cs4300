@@ -30,3 +30,11 @@ class Booking(models.Model):
     seat = models.ForeignKey(Seat, on_delete=models.CASCADE)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     booking_date = models.DateTimeField(auto_now_add=True)
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["movie", "seat"],
+                name="unique_seat_per_movie",
+            ),
+        ]
+    # https://docs.djangoproject.com/en/6.1/ref/models/constraints/

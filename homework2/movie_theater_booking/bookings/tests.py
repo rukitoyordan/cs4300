@@ -5,6 +5,7 @@ from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from django.utils import timezone
 from .models import Booking, Movie, Seat
+from django.db import IntegrityError, transaction
 
 class MovieModelTests(TestCase):
     """Test suite for validating the data integrity and core behaviors of the Movie model."""
@@ -154,3 +155,35 @@ class BookingModelTests(TestCase):
 
         with self.assertRaises(ValidationError):
             incomplete_booking.full_clean()
+        
+    def test_same_seat_cannot_be_booked_twice_for_same_movie(self):
+        """Prevent another user from booking the same seat for this movie."""
+        another_user = get_user_model().objects.create_user(
+            username="another_booking_user",
+            password="safe-test-password",
+        )
+
+        with self.assertRaises(IntegrityError):
+            with transaction.atomic():
+                Booking.objects.create(
+                    movie=self.movie,
+                    seat=self.seat,
+                    user=another_user,
+                )
+
+    def test_same_seat_can_be_booked_for_another_movie(self):
+        """Allow a seat number to be reused for a different movie."""
+        another_movie = Movie.objects.create(
+            title="Another Movie",
+            description="A different movie.",
+            release_date=date(2026, 3, 1),
+            duration=100,
+        )
+
+        Booking.objects.create(
+            movie=another_movie,
+            seat=self.seat,
+            user=self.user,
+        )
+
+        self.assertEqual(Booking.objects.filter(seat=self.seat).count(), 2)
