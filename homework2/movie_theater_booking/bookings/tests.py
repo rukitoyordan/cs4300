@@ -6,6 +6,7 @@ from django.db import IntegrityError
 from django.utils import timezone
 from .models import Booking, Movie, Seat
 from django.db import IntegrityError, transaction
+from django.urls import reverse
 
 class MovieModelTests(TestCase):
     """Test suite for validating the data integrity and core behaviors of the Movie model."""
@@ -187,3 +188,53 @@ class BookingModelTests(TestCase):
         )
 
         self.assertEqual(Booking.objects.filter(seat=self.seat).count(), 2)
+
+class SeatAvailabilityViewTests(TestCase):
+    """Test movie-specific seat availability on the seat-booking page."""
+
+    def setUp(self):
+        """Create two movies and book A1 for only the first movie."""
+        self.user = get_user_model().objects.create_user(
+            username="seat_view_user",
+            password="safe-test-password",
+        )
+        self.first_movie = Movie.objects.create(
+            title="First Movie",
+            description="The first movie.",
+            release_date=date(2026, 1, 1),
+            duration=90,
+        )
+        self.second_movie = Movie.objects.create(
+            title="Second Movie",
+            description="The second movie.",
+            release_date=date(2026, 2, 1),
+            duration=100,
+        )
+        self.seat_a1 = Seat.objects.create(seat_number="A1")
+        self.seat_a2 = Seat.objects.create(seat_number="A2")
+
+        Booking.objects.create(
+            movie=self.first_movie,
+            seat=self.seat_a1,
+            user=self.user,
+        )
+
+    def test_booked_seat_is_hidden_for_its_movie(self):
+        """Exclude A1 from the first movie while keeping A2 available."""
+        response = self.client.get(
+            reverse("bookings:seat_booking", args=[self.first_movie.pk])
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn(self.seat_a1, response.context["seats"])
+        self.assertIn(self.seat_a2, response.context["seats"])
+
+    def test_same_seat_is_available_for_another_movie(self):
+        """Show A1 for the second movie despite its first-movie booking."""
+        response = self.client.get(
+            reverse("bookings:seat_booking", args=[self.second_movie.pk])
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(self.seat_a1, response.context["seats"])
+        self.assertIn(self.seat_a2, response.context["seats"])

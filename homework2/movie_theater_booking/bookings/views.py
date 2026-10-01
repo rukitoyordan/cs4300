@@ -10,7 +10,10 @@ def movie_list(request):
 
 def seat_booking(request, movie_id):
     movie = get_object_or_404(Movie, pk=movie_id)
-    seats = Seat.objects.filter(is_booked=False).order_by("seat_number")
+    booked_seat_ids = Booking.objects.filter(movie=movie).values_list(
+        "seat_id", flat=True
+    )
+    seats = Seat.objects.exclude(pk__in=booked_seat_ids).order_by("seat_number")
 
     return render(
         request,
