@@ -31,6 +31,9 @@
             --sea-dark: #075a69;
             --ink: #173b48;
             --muted: #4b6870;
+            --action-bg: #087f91;
+            --action-hover: #075f70;
+            --action-text: #ffffff;
         }
 
         html[data-theme="night"] {
@@ -39,6 +42,9 @@
             --ink: #f4f9ff;
             --muted: #d2e3ec;
             color-scheme: dark;
+            --action-bg: #c8ccff;
+            --action-hover: #e0ddff;
+            --action-text: #173b48;
         }
 
         body {
@@ -166,17 +172,18 @@
         }
 
         .btn-sunshine {
-            color: #173b48;
-            background: var(--sun);
-            border-color: var(--sun);
+            color: var(--action-text);
+            background: var(--action-bg);
+            border-color: var(--action-bg);
             font-weight: 700;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
         }
 
         .btn-sunshine:hover,
         .btn-sunshine:focus {
-            color: #173b48;
-            background: #ffda84;
-            border-color: #ffda84;
+            color: var(--action-text);
+            background: var(--action-hover);
+            border-color: var(--action-hover);
         }
 
         .btn-outline-sea {
