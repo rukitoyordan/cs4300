@@ -40,9 +40,8 @@ class MovieModelTests(TestCase):
                     release_date=date(2026, 1, 1),
                     duration=duration,
                 )
-
-            with self.assertRaises(ValidationError):
-                invalid_movie.full_clean()
+                with self.assertRaises(ValidationError):
+                    invalid_movie.full_clean()
 
     def test_movie_missing_required_fields(self):
         """Ensure that omitting a required field like release_date triggers a validation error."""

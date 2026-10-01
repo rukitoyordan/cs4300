@@ -10,7 +10,7 @@ class Movie(models.Model):
     release_date = models.DateField()
     duration = models.PositiveIntegerField(
     help_text="Duration (minutes)",
-    # add validation to ensure duration is non-negative or zero (https://docs.djangoproject.com/en/6.1/ref/validators/)
+    # PositiveIntegerField permits zero, so require at least one minute.(https://docs.djangoproject.com/en/6.1/ref/validators/)
     validators=[MinValueValidator(1)],)
 
     def __str__(self):
