@@ -191,7 +191,6 @@ class BookingModelTests(TestCase):
 
 class SeatAvailabilityViewTests(TestCase):
     """Test movie-specific seat availability on the seat-booking page."""
-
     def setUp(self):
         """Create two movies and book A1 for only the first movie."""
         self.user = get_user_model().objects.create_user(
@@ -238,3 +237,29 @@ class SeatAvailabilityViewTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(self.seat_a1, response.context["seats"])
         self.assertIn(self.seat_a2, response.context["seats"])
+
+class LoginViewTests(TestCase):
+    """Test that users can reach and use the sign-in page."""
+    def setUp(self):
+        """Create a user whose credentials can be tested."""
+        self.user = get_user_model().objects.create_user(
+            username="login_user",
+            password="safe-test-password",
+        )
+
+    def test_login_page_loads(self):
+        """Show the sign-in form to a visitor."""
+        response = self.client.get(reverse("login"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Sign in")
+
+    def test_valid_login_redirects_to_movie_list(self):
+        """Send a signed-in user to the movie list by default."""
+        response = self.client.post(
+            reverse("login"),
+            {
+                "username": "login_user",
+                "password": "safe-test-password",
+            },
+        )
+        self.assertRedirects(response, reverse("bookings:movie_list"))
