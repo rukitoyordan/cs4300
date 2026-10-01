@@ -7,6 +7,7 @@ from django.utils import timezone
 from .models import Booking, Movie, Seat
 from django.db import IntegrityError, transaction
 from django.urls import reverse
+from rest_framework.test import APITestCase
 
 class MovieModelTests(TestCase):
     """Test suite for validating the data integrity and core behaviors of the Movie model."""
@@ -263,3 +264,45 @@ class LoginViewTests(TestCase):
             },
         )
         self.assertRedirects(response, reverse("bookings:movie_list"))
+
+class MovieAPITests(APITestCase):
+    """Test who can use the Movie API."""
+
+    def test_visitor_cannot_create_movie(self):
+        """Reject a movie submitted by someone who is not signed in."""
+        response = self.client.post(
+            "/api/movies/",
+            {
+                "title": "Unauthorized Movie",
+                "description": "This should not be saved.",
+                "release_date": "2026-09-01",
+                "duration": 100,
+            },
+            format="json",
+        )
+
+        self.assertIn(response.status_code, (401, 403))
+        self.assertFalse(Movie.objects.filter(title="Unauthorized Movie").exists())
+
+    def test_staff_can_create_movie(self):
+        """Allow a staff user to create a movie through the API."""
+        staff_user = get_user_model().objects.create_user(
+            username="movie_staff",
+            password="safe-test-password",
+            is_staff=True,
+        )
+        self.client.force_authenticate(user=staff_user)
+
+        response = self.client.post(
+            "/api/movies/",
+            {
+                "title": "Test Movie",
+                "description": "A movie created through the API.",
+                "release_date": "2026-09-01",
+                "duration": 100,
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 201)
+        self.assertTrue(Movie.objects.filter(title="Test Movie").exists())

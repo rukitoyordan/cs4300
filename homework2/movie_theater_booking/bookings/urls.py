@@ -1,10 +1,14 @@
-from django.urls import path
-
+from django.urls import include, path
+from rest_framework.routers import DefaultRouter
 from . import views
 
 app_name = "bookings"
 
+router = DefaultRouter()
+router.register("movies", views.MovieViewSet, basename="movie")
+
 urlpatterns = [
+    path("api/", include(router.urls)),
     path("", views.movie_list, name="movie_list"),
     path(
         "movies/<int:movie_id>/seats/",
