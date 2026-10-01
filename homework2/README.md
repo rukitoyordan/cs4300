@@ -30,6 +30,8 @@ python manage.py startapp bookings
 In this section, the command populates files and then `models.py` is defining information on database for movies, seats, and bookings. Instead of copying a movie, Django contains foreign keys and Bookings uses it.
 
 ### Creation of Database Tables
+Any new changes to bookings, run these commands from the `movie_theater_booking` folder.
+
 ```bash
 python manage.py makemigrations bookings
 python manage.py migrate
@@ -59,5 +61,6 @@ Codex GPT-5.6 Terra was utilized to analyze Django content, learn about how Djan
 
 Other usage:
 - Elaborate understanding on how certain Django functions work for the `bookings` application and file organization for that specific task.
+- Learn how to remove certain Django warning messages regarding BigAutoField.
 
 Gemini 3.1 Pro was utilized to better understand Django's native `TestCase` to create better unit and integration testing from the first commits. Rather than waiting till the end, the idea is taking more time to ensure good test-driven development is practiced in this homework to help with the course project later on.
