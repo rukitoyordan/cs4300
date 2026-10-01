@@ -52,9 +52,13 @@ This homework is taking advantage of Django's `TestCase` for unit and integratio
 
 ### Available Unit Tests
 ```bash
-python3 manage.py test bookings.tests.MovieModelTests -v 2 # Test Count: 6
+python3 manage.py test bookings.tests.MovieModelTests -v 2 # Test Count: 4
 python3 manage.py test bookings.tests.SeatModelTests -v 2 # Test Count: 5
-python3 manage.py test bookings.tests.BookingModelTests -v 2 # Test Count: 5
+python3 manage.py test bookings.tests.BookingModelTests -v 2 # Test Count: 7
+python3 manage.py test bookings.tests.SeatAvailabilityViewTests -v 2 # Test Count: 2
+
+python3 manage.py test bookings -v 2 # Run all bookings app tests
+python3 manage.py test -v 2 # Run all project tests
 ```
 
 ## AI Usage Log
