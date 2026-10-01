@@ -18,9 +18,9 @@ python3 -m pip install django djangorestframework
 From the `homework2` directory:
 ```bash
 cd movie_theater_booking
-python3 manage.py runserver
+python manage.py runserver 0.0.0.0:3000
 ```
-Then open http://127.0.0.1:8000/ in a browser. 
+For DevEdu, it is required to use Port 3000, otherwise it will show a Bad Gateway 502 Error.
 
 ## Booking App
 The `bookings` application created inside the `movie_theater_booking` project is ran by:
