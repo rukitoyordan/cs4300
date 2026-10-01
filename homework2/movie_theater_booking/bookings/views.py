@@ -1,6 +1,8 @@
 from django.shortcuts import render
 from django.shortcuts import get_object_or_404
 from .models import Booking, Movie, Seat
+from rest_framework import permissions, viewsets
+from .serializers import MovieSerializer
 
 
 def movie_list(request):
@@ -40,3 +42,15 @@ def booking_history(request):
             "is_authenticated": request.user.is_authenticated,
         },
     )
+
+class IsAdminOrReadOnly(permissions.BasePermission):
+    """Let everyone view movies, but only staff change them."""
+
+    def has_permission(self, request, view):
+        return request.method in permissions.SAFE_METHODS or request.user.is_staff
+        
+class MovieViewSet(viewsets.ModelViewSet):
+    """Handle API requests for movies."""
+    queryset = Movie.objects.all().order_by("title")
+    serializer_class = MovieSerializer
+    permission_classes = [IsAdminOrReadOnly]
