@@ -1,0 +1,140 @@
+{% extends "bookings/base.html" %}
+
+{% block title %}Seat Availability | Movie Theater Booking{% endblock %}
+
+{% block extra_css %}
+<style>
+    .movie-summary {
+        border-left: 5px solid var(--sea);
+    }
+
+    .availability-count {
+        display: inline-block;
+        padding: 0.5rem 0.9rem;
+        border-radius: 999px;
+        color: #173b48;
+        background: #a6eeee;
+        font-weight: 700;
+    }
+
+    .seat-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(135px, 1fr));
+        gap: 1rem;
+    }
+
+    .seat-tile {
+        padding: 1.25rem 0.75rem;
+        border: 2px solid rgba(8, 127, 145, 0.45);
+        border-radius: 1rem;
+        background: rgba(229, 251, 249, 0.85);
+        text-align: center;
+    }
+
+    .seat-shape {
+        display: block;
+        width: 3rem;
+        height: 2.25rem;
+        margin: 0 auto 0.85rem;
+        border-radius: 0.8rem 0.8rem 0.4rem 0.4rem;
+        background: #087f91;
+        box-shadow: 0 5px 0 #075a69;
+    }
+
+    .seat-number {
+        display: block;
+        color: var(--ink);
+        font-weight: 800;
+    }
+
+    .seat-status {
+        display: block;
+        margin-top: 0.25rem;
+        color: var(--sea-dark);
+        font-size: 0.875rem;
+        font-weight: 600;
+    }
+
+    html[data-theme="night"] .availability-count {
+        color: #173b48;
+        background: #c8ccff;
+    }
+
+    html[data-theme="night"] .seat-tile {
+        border-color: rgba(200, 204, 255, 0.55);
+        background: rgba(22, 39, 73, 0.9);
+    }
+
+    html[data-theme="night"] .seat-shape {
+        background: #c8ccff;
+        box-shadow: 0 5px 0 #8995d4;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section aria-labelledby="seats-heading">
+    <div class="d-flex flex-wrap align-items-start justify-content-between gap-3 mb-4">
+        <div>
+            <p class="page-kicker mb-2">Find your place</p>
+            <h2 id="seats-heading" class="display-6 fw-bold mb-2">
+                Available Seats
+            </h2>
+            <p class="text-muted-custom mb-0">
+                See which seats are open for {{ movie.title }}.
+            </p>
+        </div>
+
+        <a class="btn btn-outline-sea"
+           href="{% url 'bookings:movie_list' %}">
+            ← Back to Movies
+        </a>
+    </div>
+
+    <div class="surface-card movie-summary mb-4">
+        <h3 class="h4 fw-bold mb-2">{{ movie.title }}</h3>
+        <p class="text-muted-custom mb-3">{{ movie.description }}</p>
+        <p class="mb-0">
+            <span class="me-3">📅 {{ movie.release_date|date:"M j, Y" }}</span>
+            <span>⏱ {{ movie.duration }} minutes</span>
+        </p>
+    </div>
+
+    <div class="surface-card">
+        <div class="d-flex flex-wrap align-items-center
+                    justify-content-between gap-3 mb-4">
+            <div>
+                <h3 class="h4 fw-bold mb-1">Open seats</h3>
+                <p class="text-muted-custom mb-0">
+                    Booking a seat will be added in the next step.
+                </p>
+            </div>
+            <span class="availability-count">
+                {{ seats|length }} available
+            </span>
+        </div>
+
+        {% if seats %}
+            <div class="seat-grid">
+                {% for seat in seats %}
+                    <div class="seat-tile">
+                        <span class="seat-shape" aria-hidden="true"></span>
+                        <span class="seat-number">
+                            Seat {{ seat.seat_number }}
+                        </span>
+                        <span class="seat-status">Available</span>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="text-center py-4">
+                <div class="fs-1 mb-2" aria-hidden="true">🌙</div>
+                <h4 class="fw-bold">No open seats right now</h4>
+                <p class="text-muted-custom mb-0">
+                    Check back later or explore another movie.
+                </p>
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

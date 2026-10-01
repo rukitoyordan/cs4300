@@ -1,0 +1,137 @@
+{% extends "bookings/base.html" %}
+
+{% block title %}Booking History | Movie Theater Booking{% endblock %}
+
+{% block extra_css %}
+<style>
+    .history-card {
+        display: flex;
+        align-items: flex-start;
+        gap: 1.25rem;
+        border-left: 5px solid var(--sea);
+    }
+
+    .ticket-icon {
+        display: grid;
+        flex: 0 0 3.5rem;
+        width: 3.5rem;
+        height: 3.5rem;
+        place-items: center;
+        border-radius: 1rem;
+        background: rgba(8, 127, 145, 0.13);
+        font-size: 1.75rem;
+    }
+
+    .history-card h3 {
+        font-weight: 800;
+        letter-spacing: -0.03em;
+    }
+
+    .booking-detail {
+        margin-bottom: 0.4rem;
+        color: var(--muted);
+    }
+
+    .booking-detail strong {
+        color: var(--ink);
+    }
+
+    .history-count {
+        display: inline-block;
+        padding: 0.5rem 0.9rem;
+        border-radius: 999px;
+        color: #173b48;
+        background: #a6eeee;
+        font-weight: 700;
+    }
+
+    .history-empty {
+        max-width: 42rem;
+        margin: 0 auto;
+        text-align: center;
+    }
+
+    html[data-theme="night"] .ticket-icon {
+        background: rgba(200, 204, 255, 0.2);
+    }
+
+    html[data-theme="night"] .history-count {
+        background: #c8ccff;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section aria-labelledby="history-heading">
+    <div class="d-flex flex-wrap align-items-start
+                justify-content-between gap-3 mb-4">
+        <div>
+            <p class="page-kicker mb-2">Your movie memories</p>
+            <h2 id="history-heading" class="display-6 fw-bold mb-2">
+                Booking History
+            </h2>
+            <p class="text-muted-custom mb-0">
+                A look at the movies and seats you’ve booked.
+            </p>
+        </div>
+
+        {% if is_authenticated %}
+            <span class="history-count">
+                {{ bookings|length }} booking{{ bookings|length|pluralize }}
+            </span>
+        {% endif %}
+    </div>
+
+    {% if is_authenticated %}
+        <div class="row row-cols-1 row-cols-lg-2 g-4">
+            {% for booking in bookings %}
+                <div class="col">
+                    <article class="surface-card history-card">
+                        <span class="ticket-icon" aria-hidden="true">🎟️</span>
+
+                        <div>
+                            <h3 class="h4 mb-3">{{ booking.movie.title }}</h3>
+
+                            <p class="booking-detail">
+                                Seat:
+                                <strong>{{ booking.seat.seat_number }}</strong>
+                            </p>
+
+                            <p class="booking-detail mb-0">
+                                Booked:
+                                <strong>
+                                    {{ booking.booking_date|date:"M j, Y" }}
+                                    at {{ booking.booking_date|time:"g:i A" }}
+                                </strong>
+                            </p>
+                        </div>
+                    </article>
+                </div>
+            {% empty %}
+                <div class="col-12">
+                    <div class="surface-card history-empty py-5">
+                        <div class="fs-1 mb-3" aria-hidden="true">🍿</div>
+                        <h3 class="h4 fw-bold">No bookings yet</h3>
+                        <p class="text-muted-custom mb-4">
+                            Your movie nights will appear here after
+                            you book a seat.
+                        </p>
+                        <a class="btn btn-sunshine"
+                           href="{% url 'bookings:movie_list' %}">
+                            Explore Movies
+                        </a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="surface-card history-empty py-5">
+            <div class="fs-1 mb-3" aria-hidden="true">🎟️</div>
+            <h3 class="h4 fw-bold">Your bookings are private</h3>
+            <p class="text-muted-custom mb-0">
+                Sign in to view your booking history.
+            </p>
+        </div>
+    {% endif %}
+</section>
+{% endblock %}

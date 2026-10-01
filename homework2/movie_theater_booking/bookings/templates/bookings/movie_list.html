@@ -1,0 +1,134 @@
+{% extends "bookings/base.html" %}
+
+{% block title %}Movies | Movie Theater Booking{% endblock %}
+
+{% block extra_css %}
+<style>
+    .movie-poster {
+        position: relative;
+        display: grid;
+        min-height: 11rem;
+        place-items: center;
+        overflow: hidden;
+        border-radius: 0.9rem;
+        background: linear-gradient(135deg, #9be8e9, #087f91);
+    }
+
+    .movie-poster::before {
+        content: "";
+        position: absolute;
+        top: 1.25rem;
+        right: 1.5rem;
+        width: 4.5rem;
+        height: 4.5rem;
+        border-radius: 50%;
+        background: #ffda84;
+    }
+
+    .movie-poster span {
+        position: relative;
+        font-size: 3.5rem;
+        filter: drop-shadow(0 5px 10px rgba(0, 0, 0, 0.2));
+    }
+
+    .movie-card {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .movie-card h3 {
+        font-weight: 800;
+        letter-spacing: -0.03em;
+    }
+
+    .movie-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .movie-meta span {
+        padding: 0.4rem 0.7rem;
+        border-radius: 999px;
+        background: rgba(8, 127, 145, 0.1);
+        color: var(--ink);
+        font-size: 0.875rem;
+        font-weight: 600;
+    }
+
+    .empty-state {
+        max-width: 42rem;
+        margin: 0 auto;
+        text-align: center;
+    }
+
+    .empty-state-icon {
+        font-size: 3rem;
+    }
+
+    html[data-theme="night"] .movie-poster {
+        background: linear-gradient(135deg, #19325e, #8393d7);
+    }
+
+    html[data-theme="night"] .movie-poster::before {
+        background: #eee4bc;
+    }
+
+    html[data-theme="night"] .movie-meta span {
+        background: rgba(200, 204, 255, 0.17);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section aria-labelledby="movies-heading">
+    <div class="mb-4">
+        <p class="page-kicker mb-2">Pick your next escape</p>
+        <h2 id="movies-heading" class="display-6 fw-bold mb-2">Now Showing</h2>
+        <p class="text-muted-custom mb-0">
+            Find a movie you love, then choose your seat.
+        </p>
+    </div>
+
+    <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
+        {% for movie in movies %}
+            <div class="col">
+                <article class="surface-card movie-card">
+                    <div class="movie-poster" aria-hidden="true">
+                        <span>🎬</span>
+                    </div>
+
+                    <div>
+                        <h3 class="h4 mb-2">{{ movie.title }}</h3>
+                        <p class="text-muted-custom mb-0">
+                            {{ movie.description|truncatewords:30 }}
+                        </p>
+                    </div>
+
+                    <div class="movie-meta">
+                        <span>📅 {{ movie.release_date|date:"M j, Y" }}</span>
+                        <span>⏱ {{ movie.duration }} min</span>
+                    </div>
+
+                    <a class="btn btn-sunshine mt-auto"
+                       href="{% url 'bookings:seat_booking' movie.id %}">
+                        View Available Seats
+                    </a>
+                </article>
+            </div>
+        {% empty %}
+            <div class="col-12">
+                <div class="surface-card empty-state py-5">
+                    <div class="empty-state-icon mb-3" aria-hidden="true">🏝️</div>
+                    <h3 class="h4 fw-bold">No movies are showing yet</h3>
+                    <p class="text-muted-custom mb-0">
+                        Once movies are added, you’ll find them here.
+                        Check back soon for your next movie night.
+                    </p>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}
