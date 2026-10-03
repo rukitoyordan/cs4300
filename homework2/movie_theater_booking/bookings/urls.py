@@ -18,4 +18,5 @@ urlpatterns = [
         name="seat_booking",
     ),
     path("bookings/history/", views.booking_history, name="booking_history"),
+    path("signup/", views.signup, name="signup"),
 ]

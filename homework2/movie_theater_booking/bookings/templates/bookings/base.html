@@ -280,15 +280,29 @@
                         🌙 Night mode
                     </button>
 
-                    <a class="btn btn-outline-sea"
-                       href="{% url 'bookings:booking_history' %}">
-                        My Bookings
-                    </a>
+                    {% if user.is_authenticated %}
+                        <a class="btn btn-outline-sea"
+                           href="{% url 'bookings:booking_history' %}">
+                            My Bookings
+                        </a>
 
-                    <a class="btn btn-sunshine"
-                       href="{% url 'bookings:movie_list' %}">
-                        Explore Movies
-                    </a>
+                        <form method="post" action="{% url 'logout' %}" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sunshine">
+                                Logout
+                            </button>
+                        </form>
+                    {% else %}
+                        <a class="btn btn-outline-sea"
+                           href="{% url 'login' %}">
+                            Login
+                        </a>
+
+                        <a class="btn btn-sunshine"
+                           href="{% url 'bookings:signup' %}">
+                            Sign Up
+                        </a>
+                    {% endif %}
                 </div>
             </div>
         </div>

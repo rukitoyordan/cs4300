@@ -1,11 +1,14 @@
 from django.shortcuts import render, redirect, get_object_or_404  # Added redirect
 from django.contrib import messages  # Added for flash messages
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import login
 from .models import Booking, Movie, Seat
 from django.db.models import Exists, OuterRef
 from rest_framework import mixins, permissions, viewsets
 from rest_framework.exceptions import ValidationError
 from .serializers import BookingSerializer, MovieSerializer, SeatSerializer
 from .services import create_booking, SeatUnavailable
+from .forms import SignUpForm
 
 
 def movie_list(request):
@@ -13,16 +16,28 @@ def movie_list(request):
     return render(request, "bookings/movie_list.html", {"movies": movies})
 
 
+def signup(request):
+    """Handle user registration."""
+    if request.method == "POST":
+        form = SignUpForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            messages.success(request, "Account created successfully! Welcome aboard.")
+            return redirect("bookings:movie_list")
+    else:
+        form = SignUpForm()
+    
+    return render(request, "bookings/signup.html", {"form": form})
+
+
+@login_required
 def seat_booking(request, movie_id):
     """Display available seats and handle seat booking submissions."""
     movie = get_object_or_404(Movie, pk=movie_id)
     
     # Handle booking submission
     if request.method == "POST":
-        if not request.user.is_authenticated:
-            messages.error(request, "Please sign in to book a seat.")
-            return redirect("login")
-        
         seat_id = request.POST.get("seat_id")
         seat = get_object_or_404(Seat, pk=seat_id)
         
@@ -47,16 +62,14 @@ def seat_booking(request, movie_id):
     )
 
 
+@login_required
 def booking_history(request):
     """Display the current user's booking history."""
-    if request.user.is_authenticated:
-        bookings = (
-            Booking.objects.filter(user=request.user)
-            .select_related("movie", "seat")
-            .order_by("-booking_date")
-        )
-    else:
-        bookings = Booking.objects.none()
+    bookings = (
+        Booking.objects.filter(user=request.user)
+        .select_related("movie", "seat")
+        .order_by("-booking_date")
+    )
 
     return render(
         request,
