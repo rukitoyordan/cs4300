@@ -86,6 +86,6 @@ Other usage:
 
 Gemini 3.1 Pro was utilized to better understand Django's native `TestCase` to create better unit and integration testing from the first commits. Rather than waiting till the end, the idea is taking more time to ensure good test-driven development is practiced in this homework to help with the course project later on.
 
-Codex GPT-6.0 Sol helped with improving HTML file conventions to make the site look more visually appealing. Most HTML was made using primarily AI. However, it did help me practice HTML workflows and complexities.
+Codex GPT-6.0 Sol helped with improving HTML file conventions to make the site look more visually appealing. Most HTML was made using primarily AI. However, it did help me practice HTML workflows and complexities. Additionally, assisted with the movie-specific seat availability API, removal of the conflicting stored seat status, migration, integration tests, and repository-root key ignore rules. Also helped with understanding for booking serializer, streamlining some testing (although verification is needed for edge cases).
 
-Codex GPT-6.0 Sol assisted with the movie-specific seat availability API, removal of the conflicting stored seat status, migration, integration tests, and repository-root key ignore rules. Also helped with understanding for booking serializer, streamlining some testing (although verification is needed for edge cases),
+DevEdu Code was used to verify POST handling and seat booking functionality. I also wanted to use it to test how the environment worked.

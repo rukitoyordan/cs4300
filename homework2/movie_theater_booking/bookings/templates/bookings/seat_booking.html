@@ -55,6 +55,33 @@
         font-weight: 600;
     }
 
+    /* Booking button styles */
+    .seat-tile button.seat-status {
+        margin-top: 0.5rem;
+        padding: 0.4rem 1rem;
+        border: none;
+        border-radius: 0.5rem;
+        background: #087f91;
+        color: white;
+        cursor: pointer;
+        font-weight: 600;
+    }
+
+    .seat-tile button.seat-status:hover {
+        background: #075a69;
+    }
+
+    .seat-tile .seat-status.disabled {
+        background: transparent;
+        color: var(--sea-dark);
+        cursor: default;
+    }
+
+    /* Ensure forms align */
+    .seat-tile form {
+        display: contents;
+    }
+
     html[data-theme="night"] .availability-count {
         color: #173b48;
         background: #c8ccff;
@@ -68,6 +95,15 @@
     html[data-theme="night"] .seat-shape {
         background: #c8ccff;
         box-shadow: 0 5px 0 #8995d4;
+    }
+
+    html[data-theme="night"] .seat-tile button.seat-status {
+        background: #c8ccff;
+        color: #173b48;
+    }
+
+    html[data-theme="night"] .seat-tile button.seat-status:hover {
+        background: #8995d4;
     }
 </style>
 {% endblock %}
@@ -106,7 +142,7 @@
             <div>
                 <h3 class="h4 fw-bold mb-1">Open seats</h3>
                 <p class="text-muted-custom mb-0">
-                    Booking a seat will be added in the next step.
+                    Click a seat to book your spot.
                 </p>
             </div>
             <span class="availability-count">
@@ -117,13 +153,25 @@
         {% if seats %}
             <div class="seat-grid">
                 {% for seat in seats %}
-                    <div class="seat-tile">
+                    <form method="post" class="seat-tile">
+                        {% csrf_token %}
+                        <input type="hidden" name="seat_id" value="{{ seat.id }}">
+                        
                         <span class="seat-shape" aria-hidden="true"></span>
                         <span class="seat-number">
                             Seat {{ seat.seat_number }}
                         </span>
-                        <span class="seat-status">Available</span>
-                    </div>
+                        
+                        {% if user.is_authenticated %}
+                            <button type="submit" class="seat-status">
+                                Book Seat
+                            </button>
+                        {% else %}
+                            <span class="seat-status disabled">
+                                Sign in to book
+                            </span>
+                        {% endif %}
+                    </form>
                 {% endfor %}
             </div>
         {% else %}

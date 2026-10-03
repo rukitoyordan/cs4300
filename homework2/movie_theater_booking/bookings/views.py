@@ -1,10 +1,11 @@
-from django.shortcuts import render
-from django.shortcuts import get_object_or_404
+from django.shortcuts import render, redirect, get_object_or_404  # Added redirect
+from django.contrib import messages  # Added for flash messages
 from .models import Booking, Movie, Seat
 from django.db.models import Exists, OuterRef
 from rest_framework import mixins, permissions, viewsets
 from rest_framework.exceptions import ValidationError
 from .serializers import BookingSerializer, MovieSerializer, SeatSerializer
+from .services import create_booking, SeatUnavailable
 
 
 def movie_list(request):
@@ -13,7 +14,27 @@ def movie_list(request):
 
 
 def seat_booking(request, movie_id):
+    """Display available seats and handle seat booking submissions."""
     movie = get_object_or_404(Movie, pk=movie_id)
+    
+    # Handle booking submission
+    if request.method == "POST":
+        if not request.user.is_authenticated:
+            messages.error(request, "Please sign in to book a seat.")
+            return redirect("login")
+        
+        seat_id = request.POST.get("seat_id")
+        seat = get_object_or_404(Seat, pk=seat_id)
+        
+        try:
+            create_booking(movie=movie, seat=seat, user=request.user)
+            messages.success(request, f"Seat {seat.seat_number} booked successfully!")
+            return redirect("bookings:booking_history")
+        except SeatUnavailable:
+            messages.error(request, "That seat was just booked by someone else. Please choose another.")
+            # Fall through to re-render with updated seat list
+    
+    # GET request handling
     booked_seat_ids = Booking.objects.filter(movie=movie).values_list(
         "seat_id", flat=True
     )
@@ -27,6 +48,7 @@ def seat_booking(request, movie_id):
 
 
 def booking_history(request):
+    """Display the current user's booking history."""
     if request.user.is_authenticated:
         bookings = (
             Booking.objects.filter(user=request.user)
