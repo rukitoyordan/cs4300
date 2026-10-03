@@ -413,6 +413,43 @@ class BookingViewSetTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json(), [])
 
+    def test_serializer_rejects_duplicate_booking_during_validate(self):
+        """Duplicate booking is detected during serializer validation."""
+        Booking.objects.create(movie=self.movie, seat=self.seat, user=self.alice)
+
+        from bookings.serializers import BookingSerializer
+
+        data = {"movie": self.movie.pk, "seat": self.seat.pk}
+        serializer = BookingSerializer(data=data)
+
+        self.assertFalse(serializer.is_valid())
+        self.assertIn("non_field_errors", serializer.errors)
+
+    def test_unrelated_database_error_propagates(self):
+        """Non-duplicate IntegrityError is re-raised without transformation."""
+        from unittest.mock import patch
+        from django.db import IntegrityError
+        from bookings.services import create_booking
+
+        with patch("bookings.services.Booking.objects.create") as mock_create:
+            mock_create.side_effect = IntegrityError("unrelated constraint violation")
+
+            with self.assertRaises(IntegrityError) as cm:
+                create_booking(movie=self.movie, seat=self.seat, user=self.alice)
+
+            self.assertIn("constraint", str(cm.exception).lower())
+
+    def test_duplicate_booking_raises_seat_unavailable_error(self):
+        """Service raises SeatUnavailable when seat is already booked."""
+        from bookings.services import create_booking, SeatUnavailable
+
+        Booking.objects.create(movie=self.movie, seat=self.seat, user=self.alice)
+
+        with self.assertRaises(SeatUnavailable) as cm:
+            create_booking(movie=self.movie, seat=self.seat, user=self.bob)
+
+        self.assertIn("already booked", str(cm.exception).lower())
+
 
 class BookingPageTests(TestCase):
     """Test seat booking and booking history through the HTML pages."""
