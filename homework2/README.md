@@ -63,6 +63,17 @@ python3 manage.py test bookings -v 2 # Run all bookings app tests
 python3 manage.py test -v 2 # Run all project tests
 ```
 
+### Coverage and Behave Tests
+Run these from `homework2/movie_theater_booking` after installing the packages in `homework2/requirements.txt`:
+
+```bash
+python3 -m coverage run manage.py test bookings
+python3 -m coverage report -m
+python3 manage.py behave --simple
+```
+
+The coverage report counts the `bookings` app code and leaves out tests and migrations. The Behave scenario checks that a signed-in customer can book a seat and see it in booking history. `--simple` uses Django's test client, so no browser is needed.
+
 ## Seat Availability API
 
 GET /api/seats/?movie_id=<movie ID> returns each seat's status for one movie. The is_booked value is calculated from bookings for that movie, so a seat can be booked for one movie and available for another. A missing or invalid movie ID returns 400; an unknown movie returns 404. This endpoint is read-only. Booking creation is a separate implementation step.
