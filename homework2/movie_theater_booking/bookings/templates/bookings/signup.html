@@ -1,0 +1,80 @@
+{% extends "bookings/base.html" %}
+
+{% block title %}Sign Up | Movie Theater Booking{% endblock %}
+
+{% block content %}
+<section class="surface-card mx-auto" style="max-width: 28rem;">
+    <h2 class="h3 fw-bold mb-3">Create Account</h2>
+    <p class="text-muted-custom">Sign up to start booking movie tickets.</p>
+
+    <form method="post">
+        {% csrf_token %}
+        {% if form.errors %}
+            <div class="alert alert-danger" role="alert">
+                Please correct the errors below.
+            </div>
+        {% endif %}
+        
+        {% for field in form %}
+            <div class="mb-3">
+                <label for="{{ field.id_for_label }}" class="form-label">
+                    {{ field.label }}
+                </label>
+                {{ field }}
+                {% if field.help_text %}
+                    <div class="form-text text-muted-custom small">
+                        {{ field.help_text }}
+                    </div>
+                {% endif %}
+                {% if field.errors %}
+                    <div class="text-danger small">
+                        {{ field.errors|join:", " }}
+                    </div>
+                {% endif %}
+            </div>
+        {% endfor %}
+        
+        <button class="btn btn-sunshine w-100" type="submit">Sign Up</button>
+    </form>
+
+    <hr class="my-4">
+    
+    <p class="text-center text-muted-custom mb-0">
+        Already have an account? 
+        <a href="{% url 'login' %}" class="text-decoration-none" style="color: var(--sea);">
+            Sign in
+        </a>
+    </p>
+</section>
+
+<style>
+    /* Style form inputs to match the theme */
+    input[type="text"],
+    input[type="email"],
+    input[type="password"] {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 1px solid rgba(8, 127, 145, 0.3);
+        border-radius: 0.5rem;
+        background: rgba(255, 255, 255, 0.8);
+        color: var(--ink);
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    input[type="text"]:focus,
+    input[type="email"]:focus,
+    input[type="password"]:focus {
+        border-color: var(--sea);
+        box-shadow: 0 0 0 3px rgba(8, 127, 145, 0.2);
+        outline: none;
+    }
+    
+    html[data-theme="night"] input[type="text"],
+    html[data-theme="night"] input[type="email"],
+    html[data-theme="night"] input[type="password"] {
+        background: rgba(7, 27, 48, 0.6);
+        border-color: rgba(115, 216, 218, 0.3);
+        color: var(--ink);
+    }
+</style>
+{% endblock %}

@@ -23,12 +23,18 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("", include("bookings.urls")),
     path(
-    "accounts/login/",
-    auth_views.LoginView.as_view(
-        template_name="bookings/login.html",
-        next_page="bookings:movie_list",
+        "accounts/login/",
+        auth_views.LoginView.as_view(
+            template_name="bookings/login.html",
+            next_page="bookings:movie_list",
+        ),
+        name="login",
     ),
-    name="login",
-),
+    path(
+        "accounts/logout/",
+        auth_views.LogoutView.as_view(
+            next_page="bookings:movie_list",
+        ),
+        name="logout",
+    ),
 ]
-

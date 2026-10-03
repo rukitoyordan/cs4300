@@ -7,11 +7,65 @@
     <h2 class="h3 fw-bold mb-3">Sign in</h2>
     <p class="text-muted-custom">Sign in before booking a seat.</p>
 
+    {% if form.errors %}
+        <div class="alert alert-danger" role="alert">
+            Invalid username or password. Please try again.
+        </div>
+    {% endif %}
+
     <form method="post">
         {% csrf_token %}
-        {{ form.as_p }}
+        
+        <div class="mb-3">
+            <label for="id_username" class="form-label">Username</label>
+            <input type="text" name="username" id="id_username" 
+                   class="form-control" placeholder="Username" required autofocus>
+        </div>
+        
+        <div class="mb-3">
+            <label for="id_password" class="form-label">Password</label>
+            <input type="password" name="password" id="id_password" 
+                   class="form-control" placeholder="Password" required>
+        </div>
+        
         <input type="hidden" name="next" value="{{ next }}">
-        <button class="btn btn-primary" type="submit">Sign In</button>
+        <button class="btn btn-sunshine w-100" type="submit">Sign In</button>
     </form>
+
+    <hr class="my-4">
+    
+    <p class="text-center text-muted-custom mb-0">
+        Don't have an account? 
+        <a href="{% url 'bookings:signup' %}" class="text-decoration-none" style="color: var(--sea);">
+            Sign up
+        </a>
+    </p>
 </section>
+
+<style>
+    /* Style form inputs to match the theme */
+    .form-control {
+        padding: 0.75rem 1rem;
+        border: 1px solid rgba(8, 127, 145, 0.3);
+        border-radius: 0.5rem;
+        background: rgba(255, 255, 255, 0.8);
+        color: var(--ink);
+    }
+    
+    .form-control:focus {
+        border-color: var(--sea);
+        box-shadow: 0 0 0 3px rgba(8, 127, 145, 0.2);
+        background: rgba(255, 255, 255, 0.95);
+    }
+    
+    html[data-theme="night"] .form-control {
+        background: rgba(7, 27, 48, 0.6);
+        border-color: rgba(115, 216, 218, 0.3);
+        color: var(--ink);
+    }
+    
+    html[data-theme="night"] .form-control:focus {
+        background: rgba(7, 27, 48, 0.8);
+    }
+</style>
 {% endblock %}

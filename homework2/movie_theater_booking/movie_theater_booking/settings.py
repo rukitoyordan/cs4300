@@ -146,3 +146,8 @@ MAILERS = {
 
 # Fix Warning Messages regarding: makes the automatic primary-key choice explicit.
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# This tells @login_required where to redirect anonymous users
+LOGIN_URL = 'login' 
+LOGIN_REDIRECT_URL = '/' 
+LOGOUT_REDIRECT_URL = '/'
