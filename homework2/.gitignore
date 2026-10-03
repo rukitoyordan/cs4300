@@ -5,3 +5,4 @@ __pycache__/
 /github_key.pub
 db.sqlite3
 .coverage
+/movie_theater_booking/staticfiles/
