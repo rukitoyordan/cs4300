@@ -11,7 +11,7 @@ source hw2_venv/bin/activate
 ## Required Packages
 Install the Django packages required for this assignment.
 ```bash
-python3 -m pip install django djangorestframework
+python3 -m pip install -r requirements.txt
 ```
 
 ## Running the Django Development Server
