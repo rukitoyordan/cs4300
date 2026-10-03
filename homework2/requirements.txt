@@ -4,4 +4,6 @@ Pillow==12.3.0
 coverage==7.16.2
 behave-django==1.9.0
 gunicorn==26.2.0
-whitenoise==6.9.0
+whitenoise[brotli]==6.9.0
+dj-database-url==2.3.0
+psycopg2-binary==2.9.10
