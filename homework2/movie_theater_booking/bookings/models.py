@@ -16,10 +16,9 @@ class Movie(models.Model):
     def __str__(self):
         return self.title
 
-# Seat Model: seat number, booking status.
+# Seat Model: seat number; booking status depends on the movie.
 class Seat(models.Model):
     seat_number = models.CharField(max_length=10, unique=True)
-    is_booked = models.BooleanField(default=False)
 
     def __str__(self):
         return self.seat_number

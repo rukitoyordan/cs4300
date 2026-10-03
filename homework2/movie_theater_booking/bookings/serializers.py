@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Movie, Seat, Booking
+from .models import Movie, Seat
 
 
 class MovieSerializer(serializers.ModelSerializer):
@@ -9,10 +9,12 @@ class MovieSerializer(serializers.ModelSerializer):
         model = Movie
         fields = ["id", "title", "description", "release_date", "duration"]
 
+
 class SeatSerializer(serializers.ModelSerializer):
-    """Convert Seat objects to API data."""
+    """Show whether a seat is booked for the requested movie."""
+
+    is_booked = serializers.BooleanField(source="booked_for_movie", read_only=True)
 
     class Meta:
         model = Seat
         fields = ["id", "seat_number", "is_booked"]
-        read_only_fields = ["id", "is_booked"]
