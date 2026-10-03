@@ -412,3 +412,87 @@ class BookingViewSetTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json(), [])
+
+
+class BookingPageTests(TestCase):
+    """Test seat booking and booking history through the HTML pages."""
+
+    def setUp(self):
+        """Create two users and one movie with a booked and an open seat."""
+        self.user = get_user_model().objects.create_user(
+            username="page_user", password="safe-test-password"
+        )
+        self.other_user = get_user_model().objects.create_user(
+            username="other_page_user", password="safe-test-password"
+        )
+        self.movie = Movie.objects.create(
+            title="Page Test Movie",
+            description="A movie for booking page tests.",
+            release_date=date(2026, 1, 1),
+            duration=90,
+        )
+        self.booked_seat = Seat.objects.create(seat_number="A1")
+        self.open_seat = Seat.objects.create(seat_number="A2")
+        self.other_booking = Booking.objects.create(
+            movie=self.movie, seat=self.booked_seat, user=self.other_user
+        )
+        self.seat_url = reverse("bookings:seat_booking", args=[self.movie.pk])
+        self.history_url = reverse("bookings:booking_history")
+
+    def test_post_books_available_seat_and_redirects_to_history(self):
+        """A signed-in user can reserve an open seat from the HTML page."""
+        self.client.force_login(self.user)
+
+        response = self.client.post(self.seat_url, {"seat_id": self.open_seat.pk})
+
+        self.assertRedirects(response, self.history_url)
+        self.assertTrue(
+            Booking.objects.filter(
+                movie=self.movie, seat=self.open_seat, user=self.user
+            ).exists()
+        )
+        seats_response = self.client.get(self.seat_url)
+        self.assertNotIn(self.open_seat, seats_response.context["seats"])
+
+    def test_post_for_booked_seat_keeps_original_booking(self):
+        """A taken seat cannot be booked again through the HTML page."""
+        self.client.force_login(self.user)
+
+        response = self.client.post(self.seat_url, {"seat_id": self.booked_seat.pk})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn(self.booked_seat, response.context["seats"])
+        self.assertEqual(Booking.objects.count(), 1)
+        self.other_booking.refresh_from_db()
+        self.assertEqual(self.other_booking.user, self.other_user)
+
+    def test_anonymous_post_redirects_without_booking(self):
+        """A visitor cannot reserve a seat by submitting the form directly."""
+        response = self.client.post(self.seat_url, {"seat_id": self.open_seat.pk})
+
+        self.assertRedirects(response, reverse("login"))
+        self.assertFalse(
+            Booking.objects.filter(movie=self.movie, seat=self.open_seat).exists()
+        )
+
+    def test_history_shows_only_signed_in_users_bookings(self):
+        """Booking history includes this user's reservation and excludes another's."""
+        own_booking = Booking.objects.create(
+            movie=self.movie, seat=self.open_seat, user=self.user
+        )
+        self.client.force_login(self.user)
+
+        response = self.client.get(self.history_url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "bookings/booking_history.html")
+        self.assertEqual(list(response.context["bookings"]), [own_booking])
+        self.assertContains(response, "A2")
+
+    def test_anonymous_history_shows_sign_in_prompt(self):
+        """A visitor sees the sign-in prompt instead of booking records."""
+        response = self.client.get(self.history_url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.context["bookings"].exists())
+        self.assertContains(response, "Sign in to view your booking history")
