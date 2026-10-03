@@ -7,6 +7,7 @@ app_name = "bookings"
 router = DefaultRouter()
 router.register("movies", views.MovieViewSet, basename="movie")
 router.register("seats", views.SeatViewSet, basename="seat")
+router.register("bookings", views.BookingViewSet, basename="booking")
 
 urlpatterns = [
     path("api/", include(router.urls)),

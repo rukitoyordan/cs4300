@@ -2,9 +2,9 @@ from django.shortcuts import render
 from django.shortcuts import get_object_or_404
 from .models import Booking, Movie, Seat
 from django.db.models import Exists, OuterRef
-from rest_framework import permissions, viewsets
+from rest_framework import mixins, permissions, viewsets
 from rest_framework.exceptions import ValidationError
-from .serializers import MovieSerializer, SeatSerializer
+from .serializers import BookingSerializer, MovieSerializer, SeatSerializer
 
 
 def movie_list(request):
@@ -72,3 +72,20 @@ class SeatViewSet(viewsets.ReadOnlyModelViewSet):
                 Booking.objects.filter(movie=movie, seat_id=OuterRef("pk"))
             )
         ).order_by("seat_number")
+
+
+class BookingViewSet(
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    mixins.RetrieveModelMixin,
+    viewsets.GenericViewSet,
+):
+    """Let signed-in users create and read only their own bookings."""
+
+    serializer_class = BookingSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return Booking.objects.filter(user=self.request.user).select_related(
+            "movie", "seat"
+        ).order_by("-booking_date")

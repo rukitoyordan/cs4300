@@ -5,9 +5,10 @@ from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from django.utils import timezone
 from .models import Booking, Movie, Seat
+from .views import BookingViewSet
 from django.db import IntegrityError, transaction
 from django.urls import reverse
-from rest_framework.test import APITestCase
+from rest_framework.test import APIRequestFactory, APITestCase, force_authenticate
 
 class MovieModelTests(TestCase):
     """Test suite for validating the data integrity and core behaviors of the Movie model."""
@@ -338,3 +339,76 @@ class SeatAPITests(APITestCase):
             "/api/seats/", {"seat_number": "A3"}, format="json"
         )
         self.assertEqual(response.status_code, 405)
+
+
+class BookingViewSetTests(TestCase):
+    """Test who can create and read bookings through the API."""
+
+    def setUp(self):
+        """Create two users and movie seats for the booking requests."""
+        users = get_user_model().objects
+        self.alice = users.create_user(username="alice", password="test-password")
+        self.bob = users.create_user(username="bob", password="test-password")
+        self.movie = Movie.objects.create(
+            title="Test movie", description="Booking view test",
+            release_date=date(2026, 1, 1), duration=90,
+        )
+        self.seat = Seat.objects.create(seat_number="A1")
+        self.factory = APIRequestFactory()
+
+    def test_create_uses_signed_in_user(self):
+        """Save the signed-in user even when another user ID is submitted."""
+        request = self.factory.post(
+            "/api/bookings/",
+            {"movie": self.movie.pk, "seat": self.seat.pk, "user": self.bob.pk},
+            format="json",
+        )
+        force_authenticate(request, user=self.alice)
+
+        response = BookingViewSet.as_view({"post": "create"})(request)
+
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(Booking.objects.get().user, self.alice)
+
+    def test_list_and_detail_show_only_own_bookings(self):
+        """List own bookings and hide another user's booking detail."""
+        own_booking = Booking.objects.create(
+            movie=self.movie, seat=self.seat, user=self.alice,
+        )
+        other_seat = Seat.objects.create(seat_number="A2")
+        other_booking = Booking.objects.create(
+            movie=self.movie, seat=other_seat, user=self.bob,
+        )
+        list_request = self.factory.get("/api/bookings/")
+        force_authenticate(list_request, user=self.alice)
+        list_response = BookingViewSet.as_view({"get": "list"})(list_request)
+        self.assertEqual(list_response.status_code, 200)
+        self.assertEqual([item["id"] for item in list_response.data], [own_booking.pk])
+
+        detail_request = self.factory.get(f"/api/bookings/{other_booking.pk}/")
+        force_authenticate(detail_request, user=self.alice)
+        detail_response = BookingViewSet.as_view({"get": "retrieve"})(
+            detail_request, pk=other_booking.pk,
+        )
+        self.assertEqual(detail_response.status_code, 404)
+
+    def test_anonymous_user_cannot_create_booking(self):
+        """Reject booking creation when no user is signed in."""
+        request = self.factory.post(
+            "/api/bookings/",
+            {"movie": self.movie.pk, "seat": self.seat.pk}, format="json",
+        )
+
+        response = BookingViewSet.as_view({"post": "create"})(request)
+
+        self.assertIn(response.status_code, (401, 403))
+        self.assertFalse(Booking.objects.exists())
+
+    def test_booking_url_shows_list_to_signed_in_user(self):
+        """Show an empty booking list at the API URL after sign-in."""
+        self.client.force_login(self.alice)
+
+        response = self.client.get("/api/bookings/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), [])
