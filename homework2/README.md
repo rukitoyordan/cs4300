@@ -57,6 +57,7 @@ python3 manage.py test bookings.tests.SeatModelTests -v 2 # Test Count: 4
 python3 manage.py test bookings.tests.BookingModelTests -v 2 # Test Count: 7
 python3 manage.py test bookings.tests.SeatAvailabilityViewTests -v 2 # Test Count: 2
 python3 manage.py test bookings.tests.SeatAPITests -v 2 # Test Count: 4
+python3 manage.py test bookings.tests.BookingViewSetTests -v 2 # Test Count: 4
 
 python3 manage.py test bookings -v 2 # Run all bookings app tests
 python3 manage.py test -v 2 # Run all project tests
@@ -65,6 +66,15 @@ python3 manage.py test -v 2 # Run all project tests
 ## Seat Availability API
 
 GET /api/seats/?movie_id=<movie ID> returns each seat's status for one movie. The is_booked value is calculated from bookings for that movie, so a seat can be booked for one movie and available for another. A missing or invalid movie ID returns 400; an unknown movie returns 404. This endpoint is read-only. Booking creation is a separate implementation step.
+
+## Booking API
+The booking API is available at `/api/bookings/` while the development server is running. Sign in through `/accounts/login/` first. Requests from visitors who are not signed in return 403 Forbidden.
+
+- `GET /api/bookings/` lists only the signed-in user's bookings.
+- `GET /api/bookings/<id>/` shows one of their bookings; another user's booking returns 404.
+- `POST /api/bookings/` creates a booking from movie and seat IDs. For example, send {"movie": 1, "seat": 2} using IDs that exist in your database. The server sets the user and booking date. A seat already booked for that movie is rejected.
+
+To check it visually, run the server on port 3000, sign in on the site, then open `/api/bookings/` in the browser. Django REST Framework shows the GET response and a POST form. An account with no bookings sees an empty list.
 
 ## AI Usage Log
 Codex GPT-5.6 Terra was utilized to analyze Django content, learn about how Django works a bit beyond the tutorial provided in the course assignment file. As I had trouble with running Django's porting, I moved to local VSCode usage.
@@ -78,4 +88,4 @@ Gemini 3.1 Pro was utilized to better understand Django's native `TestCase` to c
 
 Codex GPT-6.0 Sol helped with improving HTML file conventions to make the site look more visually appealing. Most HTML was made using primarily AI. However, it did help me practice HTML workflows and complexities.
 
-Codex GPT-6.0 Sol assisted with the movie-specific seat availability API, removal of the conflicting stored seat status, migration, integration tests, and repository-root key ignore rules.
+Codex GPT-6.0 Sol assisted with the movie-specific seat availability API, removal of the conflicting stored seat status, migration, integration tests, and repository-root key ignore rules. Also helped with understanding for booking serializer, streamlining some testing (although verification is needed for edge cases),
