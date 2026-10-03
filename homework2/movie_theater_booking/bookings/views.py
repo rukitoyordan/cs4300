@@ -1,8 +1,10 @@
 from django.shortcuts import render
 from django.shortcuts import get_object_or_404
 from .models import Booking, Movie, Seat
+from django.db.models import Exists, OuterRef
 from rest_framework import permissions, viewsets
-from .serializers import MovieSerializer
+from rest_framework.exceptions import ValidationError
+from .serializers import MovieSerializer, SeatSerializer
 
 
 def movie_list(request):
@@ -48,9 +50,25 @@ class IsAdminOrReadOnly(permissions.BasePermission):
 
     def has_permission(self, request, view):
         return request.method in permissions.SAFE_METHODS or request.user.is_staff
-        
+
 class MovieViewSet(viewsets.ModelViewSet):
     """Handle API requests for movies."""
     queryset = Movie.objects.all().order_by("title")
     serializer_class = MovieSerializer
     permission_classes = [IsAdminOrReadOnly]
+
+class SeatViewSet(viewsets.ReadOnlyModelViewSet):
+    """Report seat availability for one requested movie."""
+
+    serializer_class = SeatSerializer
+
+    def get_queryset(self):
+        movie_id = self.request.query_params.get("movie_id")
+        if not movie_id or not movie_id.isascii() or not movie_id.isdecimal():
+            raise ValidationError({"movie_id": "Provide a valid movie ID."})
+        movie = get_object_or_404(Movie, pk=movie_id)
+        return Seat.objects.annotate(
+            booked_for_movie=Exists(
+                Booking.objects.filter(movie=movie, seat_id=OuterRef("pk"))
+            )
+        ).order_by("seat_number")
