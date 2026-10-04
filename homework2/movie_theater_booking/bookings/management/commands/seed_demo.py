@@ -14,7 +14,7 @@ SAMPLE_MOVIES = (
         "Debbie Ocean assembles a team for a daring heist at the Met Gala.",
         date(2018, 6, 8),
         111,
-        f"{TMDB_POSTER_BASE}/3KkFWjFZQYzLszRkLbkZY0aF98n.jpg",
+        f"{TMDB_POSTER_BASE}/MvYpKcwCR1mN6bN2K1H9PGBWk5m.jpg",
     ),
     (
         "Dune: Part Two",
@@ -28,14 +28,14 @@ SAMPLE_MOVIES = (
         "Three brilliant NASA mathematicians help make a historic space mission possible.",
         date(2016, 12, 25),
         127,
-        f"{TMDB_POSTER_BASE}/9lfz2W2uGjyow3am00rsPJ8i0Yq.jpg",
+        f"{TMDB_POSTER_BASE}/62HCnUTziyWcpZ1pXFcdjN04vW1.jpg",
     ),
     (
         "Interstellar",
         "Explorers travel through a wormhole in search of a future for humanity.",
         date(2014, 11, 5),
         169,
-        f"{TMDB_POSTER_BASE}/yOqvGmoiPbpR0ddT0ZR8tPoR7NfX.jpg",
+        f"{TMDB_POSTER_BASE}/gEU2QniE6E77NI6lCU6MvrIdMVD.jpg",
     ),
     (
         "The Dog Stars",
