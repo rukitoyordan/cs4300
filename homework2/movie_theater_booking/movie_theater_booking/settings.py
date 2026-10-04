@@ -97,7 +97,7 @@ WSGI_APPLICATION = "movie_theater_booking.wsgi.application"
 
 DATABASES = {
     "default": dj_database_url.config(
-        default="sqlite:///" + str(BASE_DIR / "db.sqlite3"),
+       default="sqlite:///" + str(BASE_DIR / "db.sqlite3"),
         conn_max_age=600,
     )
 }
@@ -145,7 +145,11 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 STORAGES = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
     "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        "BACKEND": (
+                            "whitenoise.storage.CompressedManifestStaticFilesStorage"
+                                            if os.environ.get("RENDER")
+                                                            else "django.contrib.staticfiles.storage.StaticFilesStorage"
+                                                                        ),
     },
 }
 
