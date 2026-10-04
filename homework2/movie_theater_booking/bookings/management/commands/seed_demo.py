@@ -72,10 +72,7 @@ class Command(BaseCommand):
                 movie.poster_url = poster_url
                 movie.save(update_fields=["poster_url"])
 
-        valid_titles = [m[0] for m in SAMPLE_MOVIES]
-        Movie.objects.exclude(title__in=valid_titles).delete()
-
-        # 3. Create Seats
+        # Create Seats
         for row in "ABC":
             for number in range(1, 6):
                 Seat.objects.get_or_create(seat_number=f"{row}{number}")
