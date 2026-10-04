@@ -453,16 +453,26 @@ class BookingViewSetTests(TestCase):
         self.assertEqual(response.json(), [])
 
     def test_serializer_rejects_duplicate_booking_during_validate(self):
-        """Duplicate booking is detected during serializer validation."""
-        Booking.objects.create(movie=self.movie, seat=self.seat, user=self.alice)
-
+        """Ensure serializer validation rejects duplicate bookings for the same seat."""
+        from django.contrib.auth.models import User
         from bookings.serializers import BookingSerializer
 
-        data = {"movie": self.movie.pk, "seat": self.seat.pk}
-        serializer = BookingSerializer(data=data)
+        alt_user = User.objects.create_user(username="altuser", password="password")
 
+        # Create an initial booking for this movie and seat
+        Booking.objects.create(movie=self.movie, seat=self.seat, user=alt_user)
+
+        # Attempt to serialize a duplicate booking with the same movie and seat
+        data = {"movie": self.movie.id, "seat": self.seat.id}
+        serializer = BookingSerializer(data=data)
+        
         self.assertFalse(serializer.is_valid())
-        self.assertIn("non_field_errors", serializer.errors)
+        # Verify the error is keyed under 'seat' and matches your custom message
+        self.assertIn("seat", serializer.errors)
+        self.assertEqual(
+            serializer.errors["seat"][0], 
+            "This seat is already booked for this movie."
+        )
 
     def test_unrelated_database_error_propagates(self):
         """Non-duplicate IntegrityError is re-raised without transformation."""
