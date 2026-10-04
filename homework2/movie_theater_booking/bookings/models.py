@@ -7,6 +7,7 @@ from django.core.validators import MinValueValidator
 class Movie(models.Model):
     title = models.CharField(max_length=500)
     description = models.TextField()
+    poster_url = models.URLField(blank=True, help_text="Poster image URL")
     release_date = models.DateField()
     duration = models.PositiveIntegerField(
     help_text="Duration (minutes)",

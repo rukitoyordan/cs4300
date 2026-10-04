@@ -110,3 +110,9 @@ Render URL: https://movie-theater-booking-pytz.onrender.com/
 The repository-root `render.yaml` defines a free Python web service and a free PostgreSQL database in Ohio. Render supplies `DATABASE_URL`, generates `SECRET_KEY`, sets `DEBUG=False`, and uses Python 3.13.5. The build installs `homework2/requirements.txt` and collects static files. Startup applies migrations, creates a demo movie and 15 seats if needed, and starts Gunicorn. A free web service may take extra time to respond after inactivity.
 
 To deploy from a new Render workspace, create a Blueprint from the `main` branch of this repository and use the default root `render.yaml` path.
+
+## Movie Posters
+
+The sample catalog includes Ocean's Eight, Dune: Part Two, Hidden Figures, and Interstellar. Their poster images load from TMDB at 780-pixel width, with attribution on the movie page. The optional `poster_url` field can be edited in Django admin; movies without one retain the illustrated fallback. On the next deployment, the migration and `seed_demo` command add these records without replacing existing movies or bookings.
+
+Codex (OpenAI) helped select the sample films, add poster support and layout, and verify the migration, seed command, and tests.
