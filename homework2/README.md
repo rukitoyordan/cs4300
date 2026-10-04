@@ -1,118 +1,100 @@
 # Homework #2: Introduction to Django
-Student: Fabian A. Perez Muñoz
-Course: CS4300/5300 002
+**Student:** Fabian A. Perez Muñoz  
+**Course:** CS4300/5300 002  
 
-## Installing Python and Virtual Environment (venv)
+---
+
+## Project Structure
+```text
+homework2/
+├── README.md
+├── requirements.txt
+└── movie_theater_booking/
+    ├── manage.py
+    ├── bookings/               # Main app containing models, serializers, views, templates, and tests
+    ├── features/               # Behave BDD feature files and step definitions
+    └── movie_theater_booking/  # Core Django project settings and routing configuration
+```
+
+## Local Setup and Execution
+From the homework2 directory, create and activate a virtual environment, install the required packages, and start the server:
 ```bash
 python3 -m venv hw2_venv
 source hw2_venv/bin/activate
-```
-
-## Required Packages
-Install the Django packages required for this assignment.
-```bash
 python3 -m pip install -r requirements.txt
-```
-
-## Running the Django Development Server
-From the `homework2` directory:
-```bash
 cd movie_theater_booking
+python manage.py migrate
+python manage.py seed_demo
 python manage.py runserver 0.0.0.0:3000
 ```
-For DevEdu, it is required to use Port 3000, otherwise it will show a Bad Gateway 502 Error.
+> Note: For DevEdu environments, port 3000 must be used to prevent a Bad Gateway 502 Error.
 
-## Booking App
-The `bookings` application created inside the `movie_theater_booking` project is ran by:
+## Admin Access:
+To test the Django admin panel locally, run python manage.py createsuperuser in your terminal to create your own master credentials, then log in at /admin/.
+
+## Design Decisions
+Seat Availability (Spec 3.2): A Seat represents a physical seat in the theater. Therefore, its booking status is determined dynamically by querying the Booking junction table for a specific movie, rather than storing a boolean status directly on the Seat model. This relational design ensures the exact same physical seat (e.g., A1) can be booked independently across different movies without data collisions.
+
+## API Endpoints
+### Seat Availability API
+`GET /api/seats/?movie_id=<movie ID>`: Returns each seat's status for a specific movie. The is_booked value is calculated dynamically from active bookings for that movie. A missing or invalid movie ID returns 400 Bad Request; an unknown movie returns 404 Not Found.
+
+### Booking API
+The booking API is strictly available to authenticated users. Requests from visitors who are not signed in return 403 Forbidden. Sign in through `/accounts/login/` first.
+
+> `GET /api/bookings/`: Lists only the signed-in user's bookings.
+
+> `GET /api/bookings/<id>/`: Shows the details of one specific booking. Attempting to view another user's booking returns 404 Not Found.
+
+> `POST /api/seats/book/ (or POST /api/bookings/)`: Creates a booking from a movie and seat ID. For example, send {"movie": 1, "seat": 2}. The server sets the user and booking date. A seat already booked for that movie is rejected.
+
+> `DELETE /api/bookings/<id>/`: Cancels an existing booking for the authenticated user, freeing the seat for that specific movie.
+
+## Testing (Unit, Integration, and Behave)
+This project utilizes Django's native TestCase alongside behave-django for BDD.
+Run the automated test suites from the movie_theater_booking directory:
 ```bash
-python manage.py startapp bookings
+python manage.py test -v 2          # Run all project unit and integration tests
+python -m coverage run manage.py test bookings
+python -m coverage report -m        # Generate a test coverage report
+python manage.py behave --simple    # Run headless BDD acceptance scenarios
 ```
-In this section, the command populates files and then `models.py` is defining information on database for movies, seats, and bookings. Instead of copying a movie, Django contains foreign keys and Bookings uses it.
-
-### Creation of Database Tables
-Any new changes to bookings, run these commands from the `movie_theater_booking` folder.
-
-```bash
-python manage.py makemigrations bookings
-python manage.py migrate
-python manage.py check
-```
-
-## Unit and Integration Testing
-https://docs.djangoproject.com/en/6.1/topics/testing/overview/
-https://docs.djangoproject.com/en/6.1/intro/tutorial05/
-
-This homework is taking advantage of Django's `TestCase` for unit and integration testing. Within `homework2/movie_theater_booking`:
-1. Open an Integrated Terminal.
-2. Ensure that `manage.py` file is within this folder.
-3. Run Unit/Integration Tests:
-   > As an example: 
-   `python3 manage.py test bookings.tests.MovieModelTests -v 2`
-   > Would run all the unit tests from the Movie Model for the Bookings App. The verbose helps with showing docstrings in the testing for better organization.
-
-### Available Unit Tests
-```bash
-python3 manage.py test bookings.tests.MovieModelTests -v 2 # Test Count: 4
-python3 manage.py test bookings.tests.SeatModelTests -v 2 # Test Count: 4
-python3 manage.py test bookings.tests.BookingModelTests -v 2 # Test Count: 7
-python3 manage.py test bookings.tests.SeatAvailabilityViewTests -v 2 # Test Count: 2
-python3 manage.py test bookings.tests.SeatAPITests -v 2 # Test Count: 4
-python3 manage.py test bookings.tests.BookingViewSetTests -v 2 # Test Count: 4
-
-python3 manage.py test bookings -v 2 # Run all bookings app tests
-python3 manage.py test -v 2 # Run all project tests
-```
-
-### Coverage and Behave Tests
-Run these from `homework2/movie_theater_booking` after installing the packages in `homework2/requirements.txt`:
-
-```bash
-python3 -m coverage run manage.py test bookings
-python3 -m coverage report -m
-python3 manage.py behave --simple
-```
-
-The coverage report counts the `bookings` app code and leaves out tests and migrations. The Behave scenario checks that a signed-in customer can book a seat and see it in booking history. `--simple` uses Django's test client, so no browser is needed.
-
-## Seat Availability API
-
-GET /api/seats/?movie_id=<movie ID> returns each seat's status for one movie. The is_booked value is calculated from bookings for that movie, so a seat can be booked for one movie and available for another. A missing or invalid movie ID returns 400; an unknown movie returns 404. This endpoint is read-only. Booking creation is a separate implementation step.
-
-## Booking API
-The booking API is available at `/api/bookings/` while the development server is running. Sign in through `/accounts/login/` first. Requests from visitors who are not signed in return 403 Forbidden.
-
-- `GET /api/bookings/` lists only the signed-in user's bookings.
-- `GET /api/bookings/<id>/` shows one of their bookings; another user's booking returns 404.
-- `POST /api/bookings/` creates a booking from movie and seat IDs. For example, send {"movie": 1, "seat": 2} using IDs that exist in your database. The server sets the user and booking date. A seat already booked for that movie is rejected.
-
-To check it visually, run the server on port 3000, sign in on the site, then open `/api/bookings/` in the browser. Django REST Framework shows the GET response and a POST form. An account with no bookings sees an empty list.
-
-## AI Usage Log
-Codex GPT-5.6 Terra was utilized to analyze Django content, learn about how Django works a bit beyond the tutorial provided in the course assignment file. As I had trouble with running Django's porting, I moved to local VSCode usage.
-
-Other usage:
-- Elaborate understanding on how certain Django functions work for the `bookings` application and file organization for that specific task.
-- Learn how to remove certain Django warning messages regarding BigAutoField.
-- Helped understand serializers as items that can translate big object database information into things like JSON files to better apply towards DRF. A topic I need to improve on a bit more.
-
-Gemini 3.1 Pro was utilized to better understand Django's native `TestCase` to create better unit and integration testing from the first commits. Rather than waiting till the end, the idea is taking more time to ensure good test-driven development is practiced in this homework to help with the course project later on.
-
-Codex GPT-6.0 Sol helped with improving HTML file conventions to make the site look more visually appealing. Most HTML was made using primarily AI. However, it did help me practice HTML workflows and complexities. Additionally, assisted with the movie-specific seat availability API, removal of the conflicting stored seat status, migration, integration tests, and repository-root key ignore rules. Also helped with understanding for booking serializer, streamlining some testing (although verification is needed for edge cases).
-
-DevEdu Code was used to verify POST handling and seat booking functionality. DevEdu Code was also used to improve test coverage by identifying uncovered lines in `services.py` and `serializers.py`, implementing tests for edge cases including IntegrityError propagation and SeatUnavailable exception handling, and adding Behave acceptance criteria for the "seat already taken" scenario. Feedback was provided on test naming conventions and proper assertion patterns for Django REST Framework serializers.
-
-Codex (OpenAI) was used to review the Render configuration and Homework 2 requirements, draft the environment-based Django settings and root `render.yaml`, add the demo-data command and admin registration, and update tests for the sign-in redirects. I reviewed the changes and verified them with Django checks, static-file collection, unit tests, Behave scenarios, and Render's Blueprint preview.
+> The Behave scenarios verify that a signed-in customer can successfully book a seat, see it in their booking history, and are correctly blocked from booking an already-taken seat.
 
 ## Render Deployment
+Live URL: https://movie-theater-booking-pytz.onrender.com/
 
-Render URL: https://movie-theater-booking-pytz.onrender.com/
-
-The repository-root `render.yaml` defines a free Python web service and a free PostgreSQL database in Ohio. Render supplies `DATABASE_URL`, generates `SECRET_KEY`, sets `DEBUG=False`, and uses Python 3.13.5. The build installs `homework2/requirements.txt` and collects static files. Startup applies migrations, creates a demo movie and 15 seats if needed, and starts Gunicorn. A free web service may take extra time to respond after inactivity.
-
-To deploy from a new Render workspace, create a Blueprint from the `main` branch of this repository and use the default root `render.yaml` path.
+The repository-root `render.yaml` defines a free Python web service and a free PostgreSQL database. Render supplies DATABASE_URL, generates SECRET_KEY, sets DEBUG=False, and uses Python 3.13.5. Startup applies migrations, cleanly updates the demo catalog without destroying subsequent user data, and starts Gunicorn.
 
 ## Movie Posters
+The sample catalog features classic films like The Matrix, Dune: Part Two, and Interstellar. Poster images load reliably from TMDB at 780-pixel width, with attribution on the movie page. The poster_url field can be edited in the Django admin panel. If a URL is broken or missing, the UI gracefully defaults to an illustrated placeholder using a javascript fallback.
 
-The sample catalog includes Ocean's Eight, Dune: Part Two, Hidden Figures, and Interstellar. Their poster images load from TMDB at 780-pixel width, with attribution on the movie page. The optional `poster_url` field can be edited in Django admin; movies without one retain the illustrated fallback. On the next deployment, the migration and `seed_demo` command add these records without replacing existing movies or bookings.
+## AI Usage Log
+- Codex GPT-5.6 Terra was utilized to analyze Django content, learn about how Django works a bit beyond the tutorial provided in the course assignment file. As I had trouble with running Django's porting, I moved to local VSCode usage.
 
-Codex (OpenAI) helped select the sample films, add poster support and layout, and verify the migration, seed command, and tests.
+Other usage:
+
+> Elaborate understanding on how certain Django functions work for the bookings application and file organization for that specific task.
+
+> Learn how to remove certain Django warning messages regarding BigAutoField.
+
+> Helped understand serializers as items that can translate big object database information into things like JSON files to better apply towards DRF. A topic I need to improve on a bit more.
+
+- Gemini 3.1 Pro was utilized to better understand Django's native TestCase to create better unit and integration testing from the first commits. Rather than waiting till the end, the idea is taking more time to ensure good test-driven development is practiced in this homework to help with the course project later on.
+
+- Codex GPT-6.0 Sol helped with improving HTML file conventions to make the site look more visually appealing. Most HTML was made using primarily AI. However, it did help me practice HTML workflows and complexities. Additionally, assisted with the movie-specific seat availability API, removal of the conflicting stored seat status, migration, integration tests, and repository-root key ignore rules. Also helped with understanding for booking serializer, streamlining some testing (although verification is needed for edge cases).
+
+- DevEdu Code was used to verify POST handling and seat booking functionality. DevEdu Code was also used to improve test coverage by identifying uncovered lines in services.py and serializers.py, implementing tests for edge cases including IntegrityError propagation and SeatUnavailable exception handling, and adding Behave acceptance criteria for the "seat already taken" scenario. Feedback was provided on test naming conventions and proper assertion patterns for Django REST Framework serializers.
+
+- Codex GPT-5.6 Terra High was used to review the Render configuration and Homework 2 requirements, draft the environment-based Django settings and root render.yaml, add the demo-data command and admin registration, and update tests for the sign-in redirects. I reviewed the changes and verified them with Django checks, static-file collection, unit tests, Behave scenarios, and Render's Blueprint preview. Codex also helped select the sample films, add poster support and layout, and verify the migration, seed command, and tests.
+
+Final deployment and polishing assistance included:
+> Resolving a HOOK-ERROR collision by allowing behave-django to handle test database setups automatically instead of relying on manual setup in features/environment.py.
+
+> Adjusting seed_demo.py to be non-destructive (removing .delete()) so Render's free-tier server restarts wouldn't wipe user data and trigger cascading booking deletions.
+
+> Implementing a Javascript onerror UI fallback to serve a local placeholder (beach-night.png) if a TMDB poster URL breaks, and fixing a TemplateSyntaxError quote collision in the HTML.
+
+> Disabling DRF's default UniqueTogetherValidator to allow custom validation messages to display on duplicate bookings and hit full test coverage.
+
+> Fixing STORAGES dictionary indentation in settings.py.
