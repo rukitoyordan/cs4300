@@ -10,11 +10,11 @@ from bookings.models import Movie, Seat
 TMDB_POSTER_BASE = "https://image.tmdb.org/t/p/w780"
 SAMPLE_MOVIES = (
     (
-        "Ocean's Eight",
-        "Debbie Ocean assembles a team for a daring heist at the Met Gala.",
-        date(2018, 6, 8),
-        111,
-        f"{TMDB_POSTER_BASE}/MvYpKcwCR1mN6bN2K1H9PGBWk5m.jpg",
+        "The Matrix",
+        "A computer hacker learns from mysterious rebels about the true nature of his reality.",
+        date(1999, 3, 31),
+        136,
+        f"{TMDB_POSTER_BASE}/f89U3ADr1oiB1s9GkdPOEpXUk5H.jpg",
     ),
     (
         "Dune: Part Two",
@@ -24,18 +24,18 @@ SAMPLE_MOVIES = (
         f"{TMDB_POSTER_BASE}/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg",
     ),
     (
-        "Hidden Figures",
-        "Three brilliant NASA mathematicians help make a historic space mission possible.",
-        date(2016, 12, 25),
-        127,
-        f"{TMDB_POSTER_BASE}/62HCnUTziyWcpZ1pXFcdjN04vW1.jpg",
+        "The Dark Knight",
+        "Batman must accept one of the greatest psychological and physical tests of his ability to fight injustice.",
+        date(2008, 7, 18),
+        152,
+        f"{TMDB_POSTER_BASE}/qJ2tW6WMUDux911r6m7haRef0WH.jpg",
     ),
     (
         "Interstellar",
         "Explorers travel through a wormhole in search of a future for humanity.",
         date(2014, 11, 5),
         169,
-        f"{TMDB_POSTER_BASE}/gEU2QniE6E77NI6lCU6MvrIdMVD.jpg",
+        f"{TMDB_POSTER_BASE}/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg",
     ),
     (
         "The Dog Stars",
@@ -58,7 +58,6 @@ class Command(BaseCommand):
     help = "Create sample movies and seats without duplicating existing records"
 
     def handle(self, *args, **options):
-
         for title, description, release_date, duration, poster_url in SAMPLE_MOVIES:
             movie, created = Movie.objects.get_or_create(
                 title=title,
@@ -69,10 +68,14 @@ class Command(BaseCommand):
                     "poster_url": poster_url,
                 },
             )
-            if not created and not movie.poster_url:
+            if not created and movie.poster_url != poster_url:
                 movie.poster_url = poster_url
                 movie.save(update_fields=["poster_url"])
 
+        valid_titles = [m[0] for m in SAMPLE_MOVIES]
+        Movie.objects.exclude(title__in=valid_titles).delete()
+
+        # 3. Create Seats
         for row in "ABC":
             for number in range(1, 6):
                 Seat.objects.get_or_create(seat_number=f"{row}{number}")

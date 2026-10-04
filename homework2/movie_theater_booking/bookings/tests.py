@@ -615,9 +615,9 @@ class SeedDemoCommandTests(TestCase):
         call_command("seed_demo")
         expected_titles = {
             "Dune: Part Two",
-            "Hidden Figures",
             "Interstellar",
-            "Ocean's Eight",
+            "The Matrix",
+            "The Dark Knight",
             "The Devil Wears Prada 2",
             "The Dog Stars",
         }
