@@ -100,3 +100,13 @@ Gemini 3.1 Pro was utilized to better understand Django's native `TestCase` to c
 Codex GPT-6.0 Sol helped with improving HTML file conventions to make the site look more visually appealing. Most HTML was made using primarily AI. However, it did help me practice HTML workflows and complexities. Additionally, assisted with the movie-specific seat availability API, removal of the conflicting stored seat status, migration, integration tests, and repository-root key ignore rules. Also helped with understanding for booking serializer, streamlining some testing (although verification is needed for edge cases).
 
 DevEdu Code was used to verify POST handling and seat booking functionality. DevEdu Code was also used to improve test coverage by identifying uncovered lines in `services.py` and `serializers.py`, implementing tests for edge cases including IntegrityError propagation and SeatUnavailable exception handling, and adding Behave acceptance criteria for the "seat already taken" scenario. Feedback was provided on test naming conventions and proper assertion patterns for Django REST Framework serializers.
+
+Codex (OpenAI) was used to review the Render configuration and Homework 2 requirements, draft the environment-based Django settings and root `render.yaml`, add the demo-data command and admin registration, and update tests for the sign-in redirects. I reviewed the changes and verified them with Django checks, static-file collection, unit tests, Behave scenarios, and Render's Blueprint preview.
+
+## Render Deployment
+
+Render URL: https://movie-theater-booking-pytz.onrender.com/
+
+The repository-root `render.yaml` defines a free Python web service and a free PostgreSQL database in Ohio. Render supplies `DATABASE_URL`, generates `SECRET_KEY`, sets `DEBUG=False`, and uses Python 3.13.5. The build installs `homework2/requirements.txt` and collects static files. Startup applies migrations, creates a demo movie and 15 seats if needed, and starts Gunicorn. A free web service may take extra time to respond after inactivity.
+
+To deploy from a new Render workspace, create a Blueprint from the `main` branch of this repository and use the default root `render.yaml` path.
