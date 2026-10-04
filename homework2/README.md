@@ -37,18 +37,16 @@ Seat Availability (Spec 3.2): A Seat represents a physical seat in the theater. 
 
 ## API Endpoints
 ### Seat Availability API
-`GET /api/seats/?movie_id=<movie ID>`: Returns each seat's status for a specific movie. The is_booked value is calculated dynamically from active bookings for that movie. A missing or invalid movie ID returns 400 Bad Request; an unknown movie returns 404 Not Found.
+> `GET /api/seats/?movie_id=<movie ID>`: Returns each seat's status for a specific movie. The is_booked value is calculated dynamically from active bookings for that movie. A missing or invalid movie ID returns 400 Bad Request; an unknown movie returns 404 Not Found.
 
 ### Booking API
-The booking API is strictly available to authenticated users. Requests from visitors who are not signed in return 403 Forbidden. Sign in through `/accounts/login/` first.
+The booking API is strictly available to authenticated users. Requests from visitors who are not signed in return `403 Forbidden`. Sign in through `/accounts/login/` first.
 
 > `GET /api/bookings/`: Lists only the signed-in user's bookings.
 
-> `GET /api/bookings/<id>/`: Shows the details of one specific booking. Attempting to view another user's booking returns 404 Not Found.
+> `GET /api/bookings/<id>/`: Shows the details of one specific booking. Attempting to view another user's booking returns `404 Not Found`.
 
-> `POST /api/seats/book/ (or POST /api/bookings/)`: Creates a booking from a movie and seat ID. For example, send {"movie": 1, "seat": 2}. The server sets the user and booking date. A seat already booked for that movie is rejected.
-
-> `DELETE /api/bookings/<id>/`: Cancels an existing booking for the authenticated user, freeing the seat for that specific movie.
+> `POST /api/seats/book/` *(or `POST /api/bookings/`)*: Creates a booking from a movie and seat ID. For example, send `{"movie": 1, "seat": 2}`. The server sets the user and booking date. A seat already booked for that movie is rejected.
 
 ## Testing (Unit, Integration, and Behave)
 This project utilizes Django's native TestCase alongside behave-django for BDD.
