@@ -165,6 +165,16 @@
         .seat-grid { gap: 1.1rem 0.45rem; }
         .seat__icon { transform: scale(0.88); }
     }
+    
+    html[data-theme="night"] .movie-summary {
+        background: rgba(15, 30, 48, 0.9);
+        border-left-color: var(--sea);
+    }
+
+    html[data-theme="night"] .movie-summary h1,
+    html[data-theme="night"] .movie-summary p {
+        color: #f7fbff;
+    }
 </style>
 {% endblock %}
 
