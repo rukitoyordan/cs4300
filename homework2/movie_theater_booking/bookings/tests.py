@@ -2,6 +2,7 @@ from django.test import TestCase
 from datetime import date
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
+from django.core.management import call_command
 from django.db import IntegrityError
 from django.utils import timezone
 from .models import Booking, Movie, Seat
@@ -344,6 +345,29 @@ class SeatAPITests(APITestCase):
         self.assertEqual(response.status_code, 405)
 
 
+    def test_signed_in_user_can_book_through_seat_endpoint(self):
+        """Create a booking through the SeatViewSet action."""
+        self.client.force_login(self.user)
+        response = self.client.post(
+            "/api/seats/book/",
+            {"movie": self.first_movie.pk, "seat": self.seat_a2.pk},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 201)
+        self.assertTrue(Booking.objects.filter(movie=self.first_movie, seat=self.seat_a2, user=self.user).exists())
+
+    def test_anonymous_user_cannot_book_through_seat_endpoint(self):
+        """Require authentication for the SeatViewSet booking action."""
+        response = self.client.post(
+            "/api/seats/book/",
+            {"movie": self.first_movie.pk, "seat": self.seat_a2.pk},
+            format="json",
+        )
+
+        self.assertIn(response.status_code, (401, 403))
+        self.assertFalse(Booking.objects.filter(movie=self.first_movie, seat=self.seat_a2).exists())
+
 class BookingViewSetTests(TestCase):
     """Test who can create and read bookings through the API."""
 
@@ -538,3 +562,59 @@ class BookingPageTests(TestCase):
         self.assertRedirects(
             response, f'{reverse("login")}?next={quote(self.history_url, safe="")}'
         )
+
+
+class SignupViewTests(TestCase):
+    """Test the public account registration flow."""
+
+    def test_signup_creates_and_logs_in_a_user(self):
+        response = self.client.post(
+            reverse("bookings:signup"),
+            {
+                "username": "new_view_user",
+                "email": "new_view_user@example.com",
+                "password1": "CorrectHorseBatteryStaple42",
+                "password2": "CorrectHorseBatteryStaple42",
+            },
+        )
+
+        self.assertRedirects(response, reverse("bookings:movie_list"))
+        self.assertTrue(get_user_model().objects.filter(username="new_view_user").exists())
+        self.assertIn("_auth_user_id", self.client.session)
+
+    def test_signup_renders_form_errors_for_invalid_data(self):
+        response = self.client.post(
+            reverse("bookings:signup"),
+            {
+                "username": "invalid_view_user",
+                "password1": "first-password",
+                "password2": "second-password",
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(get_user_model().objects.filter(username="invalid_view_user").exists())
+
+
+class SeedDemoCommandTests(TestCase):
+    """Test the repeatable demo catalog command."""
+
+    def test_seed_demo_creates_a_repeatable_catalog(self):
+        call_command("seed_demo")
+        expected_titles = {
+            "Dune: Part Two",
+            "Hidden Figures",
+            "Interstellar",
+            "Ocean's Eight",
+            "The Devil Wears Prada 2",
+            "The Dog Stars",
+        }
+        self.assertTrue(expected_titles.issubset(set(Movie.objects.values_list("title", flat=True))))
+        self.assertEqual(Seat.objects.count(), 15)
+
+        movie_count = Movie.objects.count()
+        seat_count = Seat.objects.count()
+        call_command("seed_demo")
+
+        self.assertEqual(Movie.objects.count(), movie_count)
+        self.assertEqual(Seat.objects.count(), seat_count)
