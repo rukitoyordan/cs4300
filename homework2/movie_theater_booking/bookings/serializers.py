@@ -26,7 +26,8 @@ class BookingSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Booking
-        fields = ["id", "movie", "seat", "user", "booking_time"]
+        fields = ["id", "movie", "seat", "user", "booking_date"]
+        read_only_fields = ["id", "user", "booking_date"]
         validators = []
 
     def validate(self, attrs):
