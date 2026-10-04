@@ -1,4 +1,5 @@
-from django.shortcuts import render, redirect, get_object_or_404  # Added redirect
+from django.shortcuts import render, redirect, get_object_or_404
+from django.views.decorators.http import require_POST  # Added redirect
 from django.contrib import messages  # Added for flash messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login
@@ -50,18 +51,30 @@ def seat_booking(request, movie_id):
         except SeatUnavailable:
             messages.error(request, "That seat was just booked by someone else. Please choose another.")
             # Fall through to re-render with updated seat list
-    
-    # GET request handling
-    booked_seat_ids = Booking.objects.filter(movie=movie).values_list(
-        "seat_id", flat=True
-    )
-    seats = Seat.objects.exclude(pk__in=booked_seat_ids).order_by("seat_number")
+    bookings = Booking.objects.filter(movie=movie).select_related("seat", "user")
+    bookings_by_seat = {booking.seat_id: booking for booking in bookings}
+    seats = list(Seat.objects.order_by("seat_number"))
+    for seat in seats:
+        seat.booking = bookings_by_seat.get(seat.pk)
+        seat.is_mine = bool(seat.booking and seat.booking.user_id == request.user.id)
 
     return render(
         request,
         "bookings/seat_booking.html",
         {"movie": movie, "seats": seats},
     )
+
+
+@login_required
+@require_POST
+def cancel_booking(request, booking_id):
+    """Release one of the signed-in user's seat bookings."""
+    booking = get_object_or_404(Booking, pk=booking_id, user=request.user)
+    movie_id = booking.movie_id
+    seat_number = booking.seat.seat_number
+    booking.delete()
+    messages.success(request, f"Seat {seat_number} is available again.")
+    return redirect("bookings:seat_booking", movie_id=movie_id)
 
 
 @login_required

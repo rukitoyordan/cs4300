@@ -618,3 +618,57 @@ class SeedDemoCommandTests(TestCase):
 
         self.assertEqual(Movie.objects.count(), movie_count)
         self.assertEqual(Seat.objects.count(), seat_count)
+
+
+class BookingCancellationViewTests(TestCase):
+    """Test releasing a seat from the theater layout."""
+
+    def setUp(self):
+        self.user = get_user_model().objects.create_user(
+            username="cancellation_user", password="test-password-123"
+        )
+        self.other_user = get_user_model().objects.create_user(
+            username="other_cancellation_user", password="test-password-123"
+        )
+        self.movie = Movie.objects.create(
+            title="Cancellation Test Movie",
+            description="A movie used to test seat releases.",
+            release_date=date(2026, 1, 1),
+            duration=100,
+        )
+        self.seat = Seat.objects.create(seat_number="D1")
+        self.booking = Booking.objects.create(
+            movie=self.movie, seat=self.seat, user=self.user
+        )
+
+    def test_booking_page_shows_taken_seats_and_release_control(self):
+        self.client.force_login(self.user)
+
+        response = self.client.get(
+            reverse("bookings:seat_booking", args=[self.movie.pk])
+        )
+
+        self.assertContains(response, "Taken")
+        self.assertContains(response, "Unbook")
+
+    def test_user_can_release_their_own_booking(self):
+        self.client.force_login(self.user)
+
+        response = self.client.post(
+            reverse("bookings:cancel_booking", args=[self.booking.pk])
+        )
+
+        self.assertRedirects(
+            response, reverse("bookings:seat_booking", args=[self.movie.pk])
+        )
+        self.assertFalse(Booking.objects.filter(pk=self.booking.pk).exists())
+
+    def test_user_cannot_release_someone_elses_booking(self):
+        self.client.force_login(self.other_user)
+
+        response = self.client.post(
+            reverse("bookings:cancel_booking", args=[self.booking.pk])
+        )
+
+        self.assertEqual(response.status_code, 404)
+        self.assertTrue(Booking.objects.filter(pk=self.booking.pk).exists())

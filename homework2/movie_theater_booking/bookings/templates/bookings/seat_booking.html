@@ -1,188 +1,218 @@
 {% extends "bookings/base.html" %}
 
-{% block title %}Seat Availability | Movie Theater Booking{% endblock %}
+{% block title %}Choose a Seat | Movie Theater Booking{% endblock %}
 
 {% block extra_css %}
 <style>
     .movie-summary {
         border-left: 5px solid var(--sea);
+        border-radius: 1rem;
+        background: rgba(255, 251, 249, 0.9);
+        padding: 1.4rem 1.5rem;
+        margin-bottom: 1.5rem;
     }
 
-    .availability-count {
-        display: inline-block;
-        padding: 0.5rem 0.9rem;
-        border-radius: 999px;
-        color: #173b48;
-        background: #a6eeee;
-        font-weight: 700;
+    .theater {
+        max-width: 48rem;
+        margin: 0 auto;
+        padding: 1.5rem;
+        border-radius: 1.25rem;
+        background: rgba(7, 26, 46, 0.9);
+        box-shadow: 0 1rem 2.5rem rgba(7, 26, 46, 0.25);
     }
+
+    .screen {
+        margin: 0 auto 1.5rem;
+        max-width: 34rem;
+        padding: 0.7rem;
+        border-radius: 0.3rem 0.3rem 1.5rem 1.5rem;
+        background: linear-gradient(180deg, #fffdf8, #cfe4ef);
+        color: #17334e;
+        font-size: 0.78rem;
+        font-weight: 800;
+        letter-spacing: 0.24em;
+        text-align: center;
+        box-shadow: 0 0.7rem 1.5rem rgba(202, 235, 255, 0.28);
+    }
+
+    .seat-legend {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.85rem 1.25rem;
+        margin-bottom: 1.5rem;
+        color: #f7fbff;
+        font-size: 0.85rem;
+    }
+
+    .legend-dot {
+        display: inline-block;
+        width: 0.8rem;
+        height: 0.8rem;
+        margin-right: 0.35rem;
+        border-radius: 0.2rem;
+        vertical-align: -0.05rem;
+    }
+
+    .legend-dot--available { background: #e98373; }
+    .legend-dot--taken { background: #8a929d; }
+    .legend-dot--mine { background: #b9c1ca; }
 
     .seat-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(135px, 1fr));
-        gap: 1rem;
+        grid-template-columns: repeat(5, minmax(3.2rem, 1fr));
+        gap: 1.35rem 0.85rem;
     }
 
-    .seat-tile {
-        padding: 1.25rem 0.75rem;
-        border: 2px solid rgba(8, 127, 145, 0.45);
-        border-radius: 1rem;
-        background: rgba(229, 251, 249, 0.85);
+    .seat {
+        display: grid;
+        justify-items: center;
+        gap: 0.35rem;
+        min-width: 0;
+        color: #f7fbff;
         text-align: center;
     }
 
-    .seat-shape {
-        display: block;
-        width: 3rem;
-        height: 2.25rem;
-        margin: 0 auto 0.85rem;
-        border-radius: 0.8rem 0.8rem 0.4rem 0.4rem;
-        background: #087f91;
-        box-shadow: 0 5px 0 #075a69;
+    .seat__button {
+        display: grid;
+        justify-items: center;
+        gap: 0.35rem;
+        width: 100%;
+        border: 0;
+        background: transparent;
+        color: inherit;
+        cursor: pointer;
+        font: inherit;
     }
 
-    .seat-number {
+    .seat__icon {
+        position: relative;
         display: block;
-        color: var(--ink);
+        width: 2.55rem;
+        height: 2.25rem;
+        border-radius: 0.65rem 0.65rem 0.35rem 0.35rem;
+        background: #e98373;
+        box-shadow: inset 0 -0.42rem 0 rgba(0, 0, 0, 0.17), 0 0.3rem 0 #be6157;
+        transition: transform 0.18s ease, background 0.18s ease;
+    }
+
+    .seat__icon::before,
+    .seat__icon::after {
+        position: absolute;
+        bottom: 0;
+        width: 0.38rem;
+        height: 1.3rem;
+        border-radius: 0.28rem;
+        background: inherit;
+        content: "";
+    }
+
+    .seat__icon::before { left: -0.32rem; }
+    .seat__icon::after { right: -0.32rem; }
+
+    .seat__number {
+        font-size: 0.84rem;
         font-weight: 800;
     }
 
+    .seat--available:hover .seat__icon,
+    .seat__button:focus-visible .seat__icon {
+        transform: translateY(-0.18rem);
+        background: #f29b88;
+        outline: 3px solid #fff;
+        outline-offset: 0.25rem;
+    }
+
+    .seat--taken {
+        color: #cfd7df;
+    }
+
+    .seat--taken .seat__icon {
+        background: #8a929d;
+        box-shadow: inset 0 -0.42rem 0 rgba(0, 0, 0, 0.2), 0 0.3rem 0 #666d77;
+    }
+
+    .seat--mine .seat__icon {
+        background: #b9c1ca;
+        box-shadow: inset 0 -0.42rem 0 rgba(0, 0, 0, 0.16), 0 0.3rem 0 #87909a;
+    }
+
     .seat-status {
-        display: block;
-        margin-top: 0.25rem;
-        color: var(--sea-dark);
-        font-size: 0.875rem;
-        font-weight: 600;
+        font-size: 0.73rem;
+        font-weight: 700;
     }
 
-    /* Booking button styles */
-    .seat-tile button.seat-status {
-        margin-top: 0.5rem;
-        padding: 0.4rem 1rem;
-        border: none;
-        border-radius: 0.5rem;
-        background: #087f91;
-        color: white;
-        cursor: pointer;
-        font-weight: 600;
-    }
-
-    .seat-tile button.seat-status:hover {
-        background: #075a69;
-    }
-
-    .seat-tile .seat-status.disabled {
+    .release-seat {
+        border: 1px solid #cfd7df;
+        border-radius: 999px;
         background: transparent;
-        color: var(--sea-dark);
-        cursor: default;
+        color: #f7fbff;
+        cursor: pointer;
+        font: inherit;
+        font-size: 0.72rem;
+        font-weight: 800;
+        padding: 0.2rem 0.55rem;
     }
 
-    /* Ensure forms align */
-    .seat-tile form {
-        display: contents;
+    .release-seat:hover,
+    .release-seat:focus-visible {
+        background: #f7fbff;
+        color: #17334e;
     }
 
-    html[data-theme="night"] .availability-count {
-        color: #173b48;
-        background: #c8ccff;
-    }
-
-    html[data-theme="night"] .seat-tile {
-        border-color: rgba(200, 204, 255, 0.55);
-        background: rgba(22, 39, 73, 0.9);
-    }
-
-    html[data-theme="night"] .seat-shape {
-        background: #c8ccff;
-        box-shadow: 0 5px 0 #8995d4;
-    }
-
-    html[data-theme="night"] .seat-tile button.seat-status {
-        background: #c8ccff;
-        color: #173b48;
-    }
-
-    html[data-theme="night"] .seat-tile button.seat-status:hover {
-        background: #8995d4;
+    @media (max-width: 34rem) {
+        .theater { padding: 1rem 0.7rem; }
+        .seat-grid { gap: 1.1rem 0.45rem; }
+        .seat__icon { transform: scale(0.88); }
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<section aria-labelledby="seats-heading">
-    <div class="d-flex flex-wrap align-items-start justify-content-between gap-3 mb-4">
-        <div>
-            <p class="page-kicker mb-2">Find your place</p>
-            <h2 id="seats-heading" class="display-6 fw-bold mb-2">
-                Available Seats
-            </h2>
-            <p class="text-muted-custom mb-0">
-                See which seats are open for {{ movie.title }}.
-            </p>
-        </div>
+<section class="movie-summary">
+    <p class="page-kicker">Now showing</p>
+    <h1>{{ movie.title }}</h1>
+    <p>Choose an available chair. Gray chairs are already booked.</p>
+</section>
 
-        <a class="btn btn-outline-sea"
-           href="{% url 'bookings:movie_list' %}">
-            ← Back to Movies
-        </a>
+<section class="theater" aria-label="Seat selection for {{ movie.title }}">
+    <div class="screen" aria-label="Movie screen">SCREEN</div>
+
+    <div class="seat-legend" aria-label="Seat legend">
+        <span><i class="legend-dot legend-dot--available"></i>Available</span>
+        <span><i class="legend-dot legend-dot--taken"></i>Taken</span>
+        <span><i class="legend-dot legend-dot--mine"></i>Your booking</span>
     </div>
 
-    <div class="surface-card movie-summary mb-4">
-        <h3 class="h4 fw-bold mb-2">{{ movie.title }}</h3>
-        <p class="text-muted-custom mb-3">{{ movie.description }}</p>
-        <p class="mb-0">
-            <span class="me-3">📅 {{ movie.release_date|date:"M j, Y" }}</span>
-            <span>⏱ {{ movie.duration }} minutes</span>
-        </p>
-    </div>
-
-    <div class="surface-card">
-        <div class="d-flex flex-wrap align-items-center
-                    justify-content-between gap-3 mb-4">
-            <div>
-                <h3 class="h4 fw-bold mb-1">Open seats</h3>
-                <p class="text-muted-custom mb-0">
-                    Click a seat to book your spot.
-                </p>
-            </div>
-            <span class="availability-count">
-                {{ seats|length }} available
-            </span>
-        </div>
-
-        {% if seats %}
-            <div class="seat-grid">
-                {% for seat in seats %}
-                    <form method="post" class="seat-tile">
-                        {% csrf_token %}
-                        <input type="hidden" name="seat_id" value="{{ seat.id }}">
-                        
-                        <span class="seat-shape" aria-hidden="true"></span>
-                        <span class="seat-number">
-                            Seat {{ seat.seat_number }}
-                        </span>
-                        
-                        {% if user.is_authenticated %}
-                            <button type="submit" class="seat-status">
-                                Book Seat
-                            </button>
-                        {% else %}
-                            <span class="seat-status disabled">
-                                Sign in to book
-                            </span>
-                        {% endif %}
-                    </form>
-                {% endfor %}
-            </div>
-        {% else %}
-            <div class="text-center py-4">
-                <div class="fs-1 mb-2" aria-hidden="true">🌙</div>
-                <h4 class="fw-bold">No open seats right now</h4>
-                <p class="text-muted-custom mb-0">
-                    Check back later or explore another movie.
-                </p>
-            </div>
-        {% endif %}
+    <div class="seat-grid">
+        {% for seat in seats %}
+            {% if seat.booking %}
+                <div class="seat seat--taken{% if seat.is_mine %} seat--mine{% endif %}">
+                    <span class="seat__icon" aria-hidden="true"></span>
+                    <span class="seat__number">{{ seat.seat_number }}</span>
+                    {% if seat.is_mine %}
+                        <form method="post" action="{% url 'bookings:cancel_booking' seat.booking.id %}">
+                            {% csrf_token %}
+                            <button class="release-seat" type="submit">Unbook</button>
+                        </form>
+                    {% else %}
+                        <span class="seat-status">Taken</span>
+                    {% endif %}
+                </div>
+            {% else %}
+                <form method="post" class="seat seat--available">
+                    {% csrf_token %}
+                    <input type="hidden" name="seat_id" value="{{ seat.id }}">
+                    <button class="seat__button" type="submit" aria-label="Book seat {{ seat.seat_number }}">
+                        <span class="seat__icon" aria-hidden="true"></span>
+                        <span class="seat__number">{{ seat.seat_number }}</span>
+                        <span class="seat-status">Available</span>
+                    </button>
+                </form>
+            {% endif %}
+        {% empty %}
+            <p>No seats have been created yet.</p>
+        {% endfor %}
     </div>
 </section>
 {% endblock %}

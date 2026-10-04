@@ -58,13 +58,6 @@ class Command(BaseCommand):
     help = "Create sample movies and seats without duplicating existing records"
 
     def handle(self, *args, **options):
-        if not Movie.objects.exists():
-            Movie.objects.create(
-                title="Demo Movie",
-                description="A sample screening for trying the booking app.",
-                release_date=date(2026, 1, 1),
-                duration=90,
-            )
 
         for title, description, release_date, duration, poster_url in SAMPLE_MOVIES:
             movie, created = Movie.objects.get_or_create(
