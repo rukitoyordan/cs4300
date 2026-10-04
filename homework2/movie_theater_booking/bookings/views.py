@@ -4,8 +4,10 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login
 from .models import Booking, Movie, Seat
 from django.db.models import Exists, OuterRef
-from rest_framework import mixins, permissions, viewsets
+from rest_framework import mixins, permissions, status, viewsets
+from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
+from rest_framework.response import Response
 from .serializers import BookingSerializer, MovieSerializer, SeatSerializer
 from .services import create_booking, SeatUnavailable
 from .forms import SignUpForm
@@ -107,6 +109,14 @@ class SeatViewSet(viewsets.ReadOnlyModelViewSet):
                 Booking.objects.filter(movie=movie, seat_id=OuterRef("pk"))
             )
         ).order_by("seat_number")
+
+    @action(detail=False, methods=["post"], permission_classes=[permissions.IsAuthenticated])
+    def book(self, request):
+        """Book the submitted seat for the signed-in user."""
+        serializer = BookingSerializer(data=request.data, context={"request": request})
+        serializer.is_valid(raise_exception=True)
+        booking = serializer.save()
+        return Response(BookingSerializer(booking).data, status=status.HTTP_201_CREATED)
 
 
 class BookingViewSet(
