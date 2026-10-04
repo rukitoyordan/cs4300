@@ -26,8 +26,8 @@ class BookingSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Booking
-        fields = ["id", "movie", "seat", "user", "booking_date"]
-        read_only_fields = ["id", "user", "booking_date"]
+        fields = ["id", "movie", "seat", "user", "booking_time"]
+        validators = []
 
     def validate(self, attrs):
         if Booking.objects.filter(movie=attrs["movie"], seat=attrs["seat"]).exists():
