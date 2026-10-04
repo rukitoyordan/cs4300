@@ -8,6 +8,7 @@ from .models import Booking, Movie, Seat
 from .views import BookingViewSet
 from django.db import IntegrityError, transaction
 from django.urls import reverse
+from urllib.parse import quote
 from rest_framework.test import APIRequestFactory, APITestCase, force_authenticate
 
 class MovieModelTests(TestCase):
@@ -204,6 +205,7 @@ class SeatAvailabilityViewTests(TestCase):
 
     def test_booked_seat_is_hidden_for_its_movie(self):
         """Exclude A1 from the first movie while keeping A2 available."""
+        self.client.force_login(self.user)
         response = self.client.get(
             reverse("bookings:seat_booking", args=[self.first_movie.pk])
         )
@@ -214,6 +216,7 @@ class SeatAvailabilityViewTests(TestCase):
 
     def test_same_seat_is_available_for_another_movie(self):
         """Show A1 for the second movie despite its first-movie booking."""
+        self.client.force_login(self.user)
         response = self.client.get(
             reverse("bookings:seat_booking", args=[self.second_movie.pk])
         )
@@ -507,7 +510,9 @@ class BookingPageTests(TestCase):
         """A visitor cannot reserve a seat by submitting the form directly."""
         response = self.client.post(self.seat_url, {"seat_id": self.open_seat.pk})
 
-        self.assertRedirects(response, reverse("login"))
+        self.assertRedirects(
+            response, f'{reverse("login")}?next={quote(self.seat_url, safe="")}'
+        )
         self.assertFalse(
             Booking.objects.filter(movie=self.movie, seat=self.open_seat).exists()
         )
@@ -527,9 +532,9 @@ class BookingPageTests(TestCase):
         self.assertContains(response, "A2")
 
     def test_anonymous_history_shows_sign_in_prompt(self):
-        """A visitor sees the sign-in prompt instead of booking records."""
+        """A visitor is sent to sign in before viewing booking records."""
         response = self.client.get(self.history_url)
 
-        self.assertEqual(response.status_code, 200)
-        self.assertFalse(response.context["bookings"].exists())
-        self.assertContains(response, "Sign in to view your booking history")
+        self.assertRedirects(
+            response, f'{reverse("login")}?next={quote(self.history_url, safe="")}'
+        )
