@@ -1,4 +1,5 @@
 {% extends "bookings/base.html" %}
+{% load static %}
 
 {% block title %}Movies | Movie Theater Booking{% endblock %}
 
@@ -127,10 +128,12 @@
                 <article class="surface-card movie-card">
                     {% if movie.poster_url %}
                         <div class="movie-poster">
+                            {% static 'bookings/images/beach-night.png' as fallback_img %}
                             <img src="{{ movie.poster_url }}"
                                  alt="{{ movie.title }} poster"
                                  width="780" height="1170"
-                                 loading="lazy" decoding="async">
+                                 loading="lazy" decoding="async"
+                                 onerror="this.onerror=null; this.src='{{ fallback_img }}';">
                         </div>
                     {% else %}
                         <div class="movie-poster movie-poster--placeholder" aria-hidden="true">
